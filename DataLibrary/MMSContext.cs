@@ -1,18 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 using DataLibrary.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using TaskDTO = DataLibrary.Models.TaskDTO;
 
 namespace DataLibrary
 {
@@ -28,20 +17,70 @@ namespace DataLibrary
         }
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Sprint> Sprints { get; set; }
-        public virtual DbSet<Models.Task> Tasks { get; set; }
-        public virtual DbSet<TaskComment> TaskComments { get; set; }
-        public virtual DbSet<TaskSprint> TaskSprints { get; set; }
+        public virtual DbSet<Models.AppTask> Tasks { get; set; }
+        public virtual DbSet<SprintTask> SprintTasks { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<UserTask> UserTasks { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql(
-                "server=127.0.0.1;uid=root;pwd=;database=test",
-                new MySqlServerVersion(new Version(8, 0, 27)));
+                throw new Exception("options builder not configured");
             }
+            optionsBuilder.UseLazyLoadingProxies();
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+            });
+
+            modelBuilder.Entity<AppTask>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne<User>(t => t.User)
+                    .WithMany(u => u.Tasks)
+                    .HasForeignKey(t => t.User_Id);
+            });
+
+            modelBuilder.Entity<Comment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne<User>(c => c.User)
+                    .WithMany(u => u.Comments)
+                    .HasForeignKey(c => c.User_Id);
+
+
+                entity.HasOne<AppTask>(c => c.Task)
+                    .WithMany(t => t.Comments)
+                    .HasForeignKey(c => c.Task_Id);
+            });
+
+            modelBuilder.Entity<Sprint>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+            });
+
+            modelBuilder.Entity<SprintTask>(entity => {
+                entity.HasKey(st => new { st.Sprint_Id, st.Task_Id });
+
+                entity.HasOne<Sprint>(st => st.Sprint)
+                    .WithMany(s => s.SprintTasks)
+                    .HasForeignKey(st => st.Sprint_Id);
+
+                entity.HasOne<AppTask>(st => st.Task)
+                    .WithMany(t => t.SprintTasks)
+                    .HasForeignKey(st => st.Task_Id);
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+            base.OnModelCreating(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

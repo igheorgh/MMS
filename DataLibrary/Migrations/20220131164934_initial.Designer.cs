@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataLibrary.Migrations
 {
     [DbContext(typeof(MMSContext))]
-    [Migration("20220129172140_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220131164934_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -19,51 +19,10 @@ namespace DataLibrary.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "5.0.13");
 
-            modelBuilder.Entity("DataLibrary.Models.Comment", b =>
+            modelBuilder.Entity("DataLibrary.Models.AppTask", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date_posted")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Descriptiom")
-                        .HasColumnType("longtext");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("DataLibrary.Models.Sprint", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("End_date")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Goal")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("Start_date")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Sprints");
-                });
-
-            modelBuilder.Entity("DataLibrary.Models.Task", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext");
@@ -74,46 +33,77 @@ namespace DataLibrary.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("User_Id")
+                        .HasColumnType("varchar(255)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("User_Id");
 
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("DataLibrary.Models.TaskComment", b =>
+            modelBuilder.Entity("DataLibrary.Models.Comment", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<int>("Comment_id")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("Date_Posted")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Task_id")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
 
-                    b.Property<int>("User_id")
-                        .HasColumnType("int");
+                    b.Property<string>("Task_Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("User_Id")
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskComments");
+                    b.HasIndex("Task_Id");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("Comments");
                 });
 
-            modelBuilder.Entity("DataLibrary.Models.TaskSprint", b =>
+            modelBuilder.Entity("DataLibrary.Models.Sprint", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
 
-                    b.Property<int>("SprintId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("End_Date")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Taskid")
-                        .HasColumnType("int");
+                    b.Property<string>("Goal")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Start_Date")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaskSprints");
+                    b.ToTable("Sprints");
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.SprintTask", b =>
+                {
+                    b.Property<string>("Sprint_Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Task_Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Sprint_Id", "Task_Id");
+
+                    b.HasIndex("Task_Id");
+
+                    b.ToTable("SprintTasks");
                 });
 
             modelBuilder.Entity("DataLibrary.Models.User", b =>
@@ -196,23 +186,6 @@ namespace DataLibrary.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("DataLibrary.Models.UserTask", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdTask")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdUser")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UserTasks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -343,6 +316,49 @@ namespace DataLibrary.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("DataLibrary.Models.AppTask", b =>
+                {
+                    b.HasOne("DataLibrary.Models.User", "User")
+                        .WithMany("Tasks")
+                        .HasForeignKey("User_Id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.Comment", b =>
+                {
+                    b.HasOne("DataLibrary.Models.AppTask", "Task")
+                        .WithMany("Comments")
+                        .HasForeignKey("Task_Id");
+
+                    b.HasOne("DataLibrary.Models.User", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("User_Id");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.SprintTask", b =>
+                {
+                    b.HasOne("DataLibrary.Models.Sprint", "Sprint")
+                        .WithMany("SprintTasks")
+                        .HasForeignKey("Sprint_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLibrary.Models.AppTask", "Task")
+                        .WithMany("SprintTasks")
+                        .HasForeignKey("Task_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Sprint");
+
+                    b.Navigation("Task");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -392,6 +408,25 @@ namespace DataLibrary.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.AppTask", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("SprintTasks");
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.Sprint", b =>
+                {
+                    b.Navigation("SprintTasks");
+                });
+
+            modelBuilder.Entity("DataLibrary.Models.User", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

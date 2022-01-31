@@ -15,9 +15,8 @@ namespace DataLibrary
     {
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<MMSContext>(options => options.UseMySql(
-                "server=127.0.0.1;uid=root;pwd=;database=test",
-                new MySqlServerVersion(new Version(8, 0, 27))));
+            string mySqlConnectionStr = configuration.GetConnectionString("mysql");
+            services.AddDbContext<MMSContext>(options => options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr)));
 
             services.AddIdentity<User, IdentityRole>()
                     .AddRoles<IdentityRole>()
@@ -48,9 +47,9 @@ namespace DataLibrary
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
                     ValidateIssuer = true,
-                    ValidIssuer = "AutoMarket",
+                    ValidIssuer = "FamilyTasks",
                     ValidateAudience = true,
-                    ValidAudience = "AutoMarket",
+                    ValidAudience = "FamilyTasks",
                     ClockSkew = System.TimeSpan.Zero
                 };
             });

@@ -4,6 +4,8 @@ using System;
 using DataLibrary.Models;
 using AutoMapper;
 using DataLibrary.DTO;
+using System.Linq;
+using MMSAPI.Validations;
 
 namespace MMSAPI.Controllers
 {
@@ -12,33 +14,52 @@ namespace MMSAPI.Controllers
     public class TaskController : Controller
     {
         private ITaskRepository _taskRepository;
-        private IMapper _autoMapper;
-        public TaskController(ITaskRepository taskRepository, IMapper autoMapper)
+        private ISprintRepository _sprintRepository;
+        private IUserRepository _userRepository;
+
+        public IEntityUpdateHandler _entityUpdateHandler { get; }
+
+        public TaskController(ITaskRepository taskRepository, ISprintRepository sprintRepository, IUserRepository userRepository, IEntityUpdateHandler entityUpdateHandler)
         {
             _taskRepository = taskRepository;
-            _autoMapper = autoMapper;
+            _sprintRepository = sprintRepository;
+            _userRepository = userRepository;
+            _entityUpdateHandler = entityUpdateHandler;
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] TaskDTO task)
         {
-            var atra = _autoMapper.Map<Task>(task);
             try
             {
-                return Ok(_taskRepository.Add(atra));
+                return Ok(_taskRepository.Add(GenerateTask(task)));
             }
             catch (Exception ex)
             {
                 return BadRequest();
             }
         }
+
+        private AppTask GenerateTask(TaskDTO task)
+        {
+            var atra = task.ToModel();
+            atra.Id = Guid.NewGuid().ToString();
+            atra.User = _userRepository.GetById(atra.User_Id);
+            for (int i = 0; i < task.SprintTasks.Count; i++)
+            {
+                atra.SprintTasks.ElementAt(i).Task = atra;
+                atra.SprintTasks.ElementAt(i).Sprint = _sprintRepository.GetById(atra.SprintTasks.ElementAt(i).Sprint_Id);
+                atra.SprintTasks.ElementAt(i).Task_Id = atra.Id;
+            }
+            return atra;
+        }
+
         [HttpPut]
         public IActionResult Update([FromBody] TaskDTO task)
         {
-            var atra = _autoMapper.Map<Task>(task);
             try
             {
-                return Ok(_taskRepository.Edit(atra));
+                return Ok(_entityUpdateHandler.Update(task.ToModel()));
             }
             catch (Exception ex)
             {
@@ -46,12 +67,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpDelete("Id")]
-        public IActionResult Delete(int Id)
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromQuery] string id)
         {
             try
             {
-                return Ok(_taskRepository.Delete(Id));
+                return Ok(_taskRepository.Delete(id));
             }
             catch (Exception ex)
             {
@@ -59,12 +80,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpGet("Id")]
-        public IActionResult GetById(int Id)
+        [HttpGet("{id}")]
+        public IActionResult GetById([FromQuery] string Id)
         {
             try
             {
-                return Ok(_taskRepository.GetById(Id));
+                return Ok(TaskDTO.FromModel(_taskRepository.GetById(Id)));
             }
             catch (Exception ex)
             {
@@ -77,7 +98,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_taskRepository.GetAll());
+                return Ok(_taskRepository.GetAll().Select(s => TaskDTO.FromModel(s)));
             }
             catch (Exception ex)
             {

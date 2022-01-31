@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DataLibrary.Models
 {
-    public class Comment
+    public class Comment: IEntity
     {
-        public int Id { get; set; }
-        public string Descriptiom { get; set; }
-        public DateTime Date_posted { get; set; }
+        public string Id { get; set; }
+        public string Description { get; set; }
+        public DateTime Date_Posted { get; set; }
+
+        public string User_Id { get; set; }
+        public virtual User User { get; set; }
+
+        public string Task_Id { get; set; }
+        public virtual AppTask Task { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DataLibrary;
+using DataLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace MMSAPI.Repository
             }
         }
 
-            public bool Delete(int id)
+            public bool Delete(string id)
         {
                 try
                 {
@@ -49,7 +50,7 @@ namespace MMSAPI.Repository
                 }
             }
 
-        public bool Edit(T entity)
+        public virtual bool Edit(T entity)
         {
             try
             {
@@ -63,17 +64,17 @@ namespace MMSAPI.Repository
             }
         }
 
-        public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
+        public ICollection<T> Find(Expression<Func<T, bool>> expression)
         {
-            return _context.Set<T>().Where(expression);
+            return _context.Set<T>().Where(expression).ToList();
         }
 
-        public IEnumerable<T> GetAll()
+        public ICollection<T> GetAll()
         {
-            return _context.Set<T>().AsEnumerable();
+            return _context.Set<T>().ToList();
         }
 
-        public T GetById(int id)
+        public T GetById(string id)
         {
             return _context.Set<T>().Find(id);
         }

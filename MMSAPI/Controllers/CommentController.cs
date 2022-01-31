@@ -4,6 +4,7 @@ using System;
 using DataLibrary.Models;
 using AutoMapper;
 using DataLibrary.DTO;
+using System.Linq;
 
 namespace MMSAPI.Controllers
 {
@@ -22,7 +23,8 @@ namespace MMSAPI.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] CommentDTO Comment)
         {
-            var atra = _autoMapper.Map<Comment>(Comment);
+            var atra = Comment.ToModel();
+            atra.Id = Guid.NewGuid().ToString();
             try
             {
                 return Ok(_commentRepository.Add(atra));
@@ -35,7 +37,7 @@ namespace MMSAPI.Controllers
         [HttpPut]
         public IActionResult Update([FromBody] CommentDTO Comment)
         {
-            var atra = _autoMapper.Map<Comment>(Comment);
+            var atra = Comment.ToModel();
             try
             {
                 return Ok(_commentRepository.Edit(atra));
@@ -46,12 +48,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpDelete("Id")]
-        public IActionResult Delete(int Id)
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromQuery]string id)
         {
             try
             {
-                return Ok(_commentRepository.Delete(Id));
+                return Ok(_commentRepository.Delete(id));
             }
             catch (Exception ex)
             {
@@ -59,12 +61,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpGet("Id")]
-        public IActionResult GetById(int Id)
+        [HttpGet("{id}")]
+        public IActionResult GetById([FromQuery]string id)
         {
             try
             {
-                return Ok(_commentRepository.GetById(Id));
+                return Ok(CommentDTO.FromModel(_commentRepository.GetById(id)));
             }
             catch (Exception ex)
             {
@@ -77,7 +79,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_commentRepository.GetAll());
+                return Ok(_commentRepository.GetAll().Select(s => CommentDTO.FromModel(s)));
             }
             catch (Exception ex)
             {
