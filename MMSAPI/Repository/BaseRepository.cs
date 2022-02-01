@@ -16,17 +16,17 @@ namespace MMSAPI.Repository
             this._context = context;
         }
 
-        public bool Add(T entity)
+        public T Add(T entity)
         {
             try
             {
                 _context.Set<T>().Add(entity);
                 _context.SaveChanges();
-                return true;
+                return entity;
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
 
             }
         }
@@ -50,17 +50,18 @@ namespace MMSAPI.Repository
                 }
             }
 
-        public virtual bool Edit(T entity)
+        public virtual T Edit(T entity)
         {
             try
             {
                 _context.Entry(entity).State = EntityState.Modified;
                 _context.SaveChanges();
-                return true;
+
+                return entity;
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
             }
         }
 

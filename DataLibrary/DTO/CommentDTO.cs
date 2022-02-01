@@ -25,16 +25,12 @@ namespace DataLibrary.DTO
         [JsonProperty("user_Id")]
         public string User_Id { get; set; }
 
-        [DataMember]
-        [JsonProperty("user")]
         public UserDTO User { get; set; }
 
         [DataMember]
         [JsonProperty("task_Id")]
         public string Task_Id { get; set; }
 
-        [DataMember]
-        [JsonProperty("task")]
         public TaskDTO Task { get; set; }
 
         public CommentDTO()
@@ -52,9 +48,9 @@ namespace DataLibrary.DTO
                 Description = model.Description, 
                 Date_Posted = model.Date_Posted, 
                 User_Id = model.User_Id, 
-                User = UserDTO.FromModel(model.User), 
+                //User = UserDTO.FromModel(model.User), 
                 Task_Id = model.Task_Id, 
-                Task = TaskDTO.FromModel(model.Task), 
+                //Task = TaskDTO.FromModel(model.Task), 
             }; 
         }
 

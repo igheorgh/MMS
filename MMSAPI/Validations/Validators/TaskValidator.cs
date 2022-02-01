@@ -1,6 +1,7 @@
 ﻿using DataLibrary.Models;
 using Microsoft.Extensions.DependencyInjection;
 using MMSAPI.Repository;
+using MMSAPI.Validations.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,5 +42,21 @@ namespace MMSAPI.Validations.Validators
             }
         }
 
+        protected override List<ValidationKeyValue> validate()
+        {
+            var validationResult = new List<ValidationKeyValue>();
+
+            validationResult.ValidateString("description", dbEntity.Description, 10, 200);
+            validationResult.ValidateString("name", dbEntity.Name, 10, 50);
+            validationResult.ValidateString("status", dbEntity.Status, 1, 25);
+
+            validationResult.RequireObject("user", dbEntity.User);
+            for (int i = 0; i < dbEntity.SprintTasks.Count; i++)
+            {
+                validationResult.RequireObject("sprint", dbEntity.SprintTasks.ElementAt(i).Sprint);
+            }
+
+            return validationResult;
+        }
     }
 }

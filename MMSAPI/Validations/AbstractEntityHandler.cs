@@ -1,5 +1,6 @@
 ﻿using DataLibrary.Models;
 using MMSAPI.Repository;
+using MMSAPI.Validations.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,8 @@ namespace MMSAPI.Validations
         {
             var @switch = new Dictionary<Type, Type> {
                 { typeof(AppTask), typeof(TaskRepository)},
+                { typeof(Sprint), typeof(SprintRepository)},
+                { typeof(Comment), typeof(CommentRepository)},
             };
 
             return @switch[typeof(T)];
@@ -42,20 +45,34 @@ namespace MMSAPI.Validations
         {
             MethodInfo methodDefinition = GetRepoType().GetMethod("GetById");
             var result = methodDefinition.Invoke(repository, new object[] { (newEntity.GetType().GetProperty("Id").GetValue(newEntity)) });
+
             return (T)result;
         }
 
         protected abstract void applyChanges();
 
-        //ValidationResult validate();
+        protected abstract List<ValidationKeyValue> validate();
 
-        public virtual bool update()
+        public virtual EntityHandlerResult<TSuccess> update<TSuccess>() where TSuccess: class
         {
+            if (dbEntity == null)
+            {
+                return new EntityHandlerResult<TSuccess>(new List<ValidationKeyValue> { new ValidationKeyValue("Object", "Obiectul nu exista!") }, null);
+            }
+
             applyChanges();
+
+            var validationResult = validate();
+
+            var entityHandlerResult = new EntityHandlerResult<TSuccess>(validationResult, null);
+
+            if (entityHandlerResult.ValidationResults.Count > 0) return entityHandlerResult;
 
             MethodInfo methodDefinition = GetRepoType().GetMethod("Edit");
 
-            return (bool)methodDefinition.Invoke(repository, new object[] { dbEntity });
+            entityHandlerResult.SuccessResult = (TSuccess)methodDefinition.Invoke(repository, new object[] { dbEntity });
+
+            return entityHandlerResult;
         }
     }
 }

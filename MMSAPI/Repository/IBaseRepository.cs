@@ -9,8 +9,8 @@ namespace MMSAPI.Repository
     {
         T GetById(string id);
         ICollection<T> GetAll();
-        bool Add(T entity);
-        bool Edit(T entity);
+        T Add(T entity);
+        T Edit(T entity);
         bool Delete(string id);
         ICollection<T> Find(Expression<Func<T, bool>> expression);
     }

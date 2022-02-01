@@ -1,12 +1,11 @@
 ﻿using DataLibrary.Models;
+using MMSAPI.Validations.Models;
 using System;
 
 namespace MMSAPI.Validations
 {
     public interface IEntityUpdateHandler
     {
-        IServiceProvider _serviceProvider { get; }
-
-        bool Update(IEntity entity);
+        EntityHandlerResult<TSuccess> Update<TSuccess>(IEntity entity) where TSuccess : class;
     }
 }

@@ -5,19 +5,24 @@ using DataLibrary.Models;
 using AutoMapper;
 using DataLibrary.DTO;
 using System.Linq;
+using MMSAPI.Validations;
 
 namespace MMSAPI.Controllers
 {
-    [Route("sprint")]
+    [Route("api/v1/sprint")]
     [ApiController]
-    public class sprintController : Controller
+    public class SprintController : Controller
     {
         private ISprintRepository _sprintRepository;
         private IMapper _autoMapper;
-        public sprintController(ISprintRepository sprintRepository, IMapper autoMapper)
+
+        public IEntityUpdateHandler EntityUpdateHandler { get; }
+
+        public SprintController(ISprintRepository sprintRepository, IMapper autoMapper, IEntityUpdateHandler entityUpdateHandler)
         {
             _sprintRepository = sprintRepository;
             _autoMapper = autoMapper;
+            EntityUpdateHandler = entityUpdateHandler;
         }
 
         [HttpPost]
@@ -27,7 +32,7 @@ namespace MMSAPI.Controllers
             atra.Id = Guid.NewGuid().ToString();
             try
             {
-                return Ok(_sprintRepository.Add(atra));
+                return Ok(SprintDTO.FromModel(_sprintRepository.Add(atra)));
             }
             catch (Exception ex)
             {
@@ -37,10 +42,9 @@ namespace MMSAPI.Controllers
         [HttpPut]
         public IActionResult Update([FromBody] SprintDTO sprint)
         {
-            var atra = sprint.ToModel();
             try
             {
-                return Ok(_sprintRepository.Edit(atra));
+                return EntityUpdateHandler.Update<Sprint>(sprint.ToModel()).ToHttpResponse();
             }
             catch (Exception ex)
             {

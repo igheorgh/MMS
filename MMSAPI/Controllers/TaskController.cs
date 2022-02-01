@@ -9,7 +9,7 @@ using MMSAPI.Validations;
 
 namespace MMSAPI.Controllers
 {
-    [Route("task")]
+    [Route("api/v1/task")]
     [ApiController]
     public class TaskController : Controller
     {
@@ -19,7 +19,8 @@ namespace MMSAPI.Controllers
 
         public IEntityUpdateHandler _entityUpdateHandler { get; }
 
-        public TaskController(ITaskRepository taskRepository, ISprintRepository sprintRepository, IUserRepository userRepository, IEntityUpdateHandler entityUpdateHandler)
+        public TaskController(ITaskRepository taskRepository, ISprintRepository sprintRepository, IUserRepository userRepository,
+            IEntityUpdateHandler entityUpdateHandler)
         {
             _taskRepository = taskRepository;
             _sprintRepository = sprintRepository;
@@ -32,7 +33,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_taskRepository.Add(GenerateTask(task)));
+                return Ok(TaskDTO.FromModel(_taskRepository.Add(GenerateTask(task))));
             }
             catch (Exception ex)
             {
@@ -59,7 +60,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_entityUpdateHandler.Update(task.ToModel()));
+                return _entityUpdateHandler.Update<AppTask>(task.ToModel()).ToHttpResponse();
             }
             catch (Exception ex)
             {
