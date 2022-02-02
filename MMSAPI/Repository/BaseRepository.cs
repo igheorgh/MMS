@@ -1,4 +1,5 @@
 ﻿using DataLibrary;
+using DataLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,22 @@ namespace MMSAPI.Repository
             this._context = context;
         }
 
-        public bool Add(T entity)
+        public T Add(T entity)
         {
             try
             {
                 _context.Set<T>().Add(entity);
                 _context.SaveChanges();
-                return true;
+                return entity;
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
 
             }
         }
 
-            public bool Delete(int id)
+            public bool Delete(string id)
         {
                 try
                 {
@@ -49,31 +50,32 @@ namespace MMSAPI.Repository
                 }
             }
 
-        public bool Edit(T entity)
+        public virtual T Edit(T entity)
         {
             try
             {
                 _context.Entry(entity).State = EntityState.Modified;
                 _context.SaveChanges();
-                return true;
+
+                return entity;
             }
             catch (Exception ex)
             {
-                return false;
+                return null;
             }
         }
 
-        public IEnumerable<T> Find(Expression<Func<T, bool>> expression)
+        public ICollection<T> Find(Expression<Func<T, bool>> expression)
         {
-            return _context.Set<T>().Where(expression);
+            return _context.Set<T>().Where(expression).ToList();
         }
 
-        public IEnumerable<T> GetAll()
+        public ICollection<T> GetAll()
         {
-            return _context.Set<T>().AsEnumerable();
+            return _context.Set<T>().ToList();
         }
 
-        public T GetById(int id)
+        public T GetById(string id)
         {
             return _context.Set<T>().Find(id);
         }

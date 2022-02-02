@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace DataLibrary.Models
 {
-    public  class Sprint
+    public  class Sprint: IEntity
     {
-        public int ID { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
-        public DateTime Start_date  { get; set; }
-        public DateTime End_date { get; set; } 
+        public DateTime Start_Date  { get; set; }
+        public DateTime End_Date { get; set; } 
         public string Goal { get;set; }
+        public virtual ICollection<SprintTask> SprintTasks { get; set; }
+        public Sprint()
+        {
+            SprintTasks = new HashSet<SprintTask>();
+        }
     }
 }

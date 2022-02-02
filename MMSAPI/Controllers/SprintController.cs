@@ -4,28 +4,35 @@ using System;
 using DataLibrary.Models;
 using AutoMapper;
 using DataLibrary.DTO;
+using System.Linq;
+using MMSAPI.Validations;
 
 namespace MMSAPI.Controllers
 {
-    [Route("sprint")]
+    [Route("api/v1/sprint")]
     [ApiController]
-    public class sprintController : Controller
+    public class SprintController : Controller
     {
         private ISprintRepository _sprintRepository;
         private IMapper _autoMapper;
-        public sprintController(ISprintRepository sprintRepository, IMapper autoMapper)
+
+        public IEntityUpdateHandler EntityUpdateHandler { get; }
+
+        public SprintController(ISprintRepository sprintRepository, IMapper autoMapper, IEntityUpdateHandler entityUpdateHandler)
         {
             _sprintRepository = sprintRepository;
             _autoMapper = autoMapper;
+            EntityUpdateHandler = entityUpdateHandler;
         }
 
         [HttpPost]
         public IActionResult Create([FromBody] SprintDTO sprint)
         {
-            var atra = _autoMapper.Map<Sprint>(sprint);
+            var atra = sprint.ToModel();
+            atra.Id = Guid.NewGuid().ToString();
             try
             {
-                return Ok(_sprintRepository.Add(atra));
+                return Ok(SprintDTO.FromModel(_sprintRepository.Add(atra)));
             }
             catch (Exception ex)
             {
@@ -35,10 +42,9 @@ namespace MMSAPI.Controllers
         [HttpPut]
         public IActionResult Update([FromBody] SprintDTO sprint)
         {
-            var atra = _autoMapper.Map<Sprint>(sprint);
             try
             {
-                return Ok(_sprintRepository.Edit(atra));
+                return EntityUpdateHandler.Update<Sprint>(sprint.ToModel()).ToHttpResponse();
             }
             catch (Exception ex)
             {
@@ -46,12 +52,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpDelete("Id")]
-        public IActionResult Delete(int Id)
+        [HttpDelete("{id}")]
+        public IActionResult Delete([FromQuery] string id)
         {
             try
             {
-                return Ok(_sprintRepository.Delete(Id));
+                return Ok(_sprintRepository.Delete(id));
             }
             catch (Exception ex)
             {
@@ -59,12 +65,12 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpGet("Id")]
-        public IActionResult GetById(int Id)
+        [HttpGet("{id}")]
+        public IActionResult GetById([FromQuery] string id)
         {
             try
             {
-                return Ok(_sprintRepository.GetById(Id));
+                return Ok(SprintDTO.FromModel(_sprintRepository.GetById(id)));
             }
             catch (Exception ex)
             {
@@ -77,7 +83,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_sprintRepository.GetAll());
+                return Ok(_sprintRepository.GetAll().Select(s => SprintDTO.FromModel(s)));
             }
             catch (Exception ex)
             {

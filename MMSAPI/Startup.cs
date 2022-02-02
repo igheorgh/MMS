@@ -1,15 +1,11 @@
 using DataLibrary;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MMSAPI.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using MMSAPI.Validations;
 
 namespace MMSAPI
 {
@@ -26,14 +22,15 @@ namespace MMSAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            ); 
             MMSStartup.ConfigureServices(services, Configuration);
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICommentRepository, CommentRepository>();
             services.AddScoped<ISprintRepository, SprintRepository>();
             services.AddScoped<ITaskRepository, TaskRepository>();
-            services.AddScoped<ITaskSprintRepository, TaskSprintRepository>();
-            services.AddScoped<ITaskCommentRepository, TaskCommentRepository>();
-            services.AddScoped<IUserTaskRepository, UserTaskRepository>();
+            services.AddScoped<IEntityUpdateHandler, EntityUpdateHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,9 +49,14 @@ namespace MMSAPI
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
             app.UseRouting();
 
-            app.UseAuthorization();
+            MMSStartup.Configure(app);
 
             app.UseEndpoints(endpoints =>
             {
