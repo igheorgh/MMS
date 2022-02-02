@@ -1,0 +1,34 @@
+<!--Navbar-->
+<mdb-navbar SideClass="navbar fixed-top navbar-expand-lg navbar-dark cyan" [containerInside]="false">
+
+    <!-- Navbar brand -->
+    <mdb-navbar-brand><a class="navbar-brand" routerLink='/sprints'>FamilyTasks</a></mdb-navbar-brand>
+  
+    <!-- Collapsible content -->
+    <links>
+  
+      <!-- Links -->
+      <ul class="navbar-nav ml-auto">
+
+        <li class="nav-item" *ngIf="!userLoggedIn">
+          <a class="nav-link waves-light" mdbWavesEffect routerLink='/auth'><mdb-icon fas icon="sign-in-alt"></mdb-icon>Autentificare</a>
+        </li>
+
+  
+        <!-- Dropdown -->
+        <li class="nav-item dropdown" dropdown *ngIf="userLoggedIn">
+          <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
+            <mdb-icon fas icon="user"></mdb-icon> {{username}}<span class="caret"></span></a>
+          <div *dropdownMenu class="dropdown-menu dropdown-menu-right dropdown dropdown-primary" role="menu">
+            <a class="dropdown-item waves-light" mdbWavesEffect routerLink='/dashboard/account'>Contul meu</a>
+            <a class="dropdown-item waves-light" mdbWavesEffect (click)="signOut()">Deconectare</a>
+          </div>
+        </li>
+  
+      </ul>
+      <!-- Links -->
+    </links>
+    <!-- Collapsible content -->
+  
+  </mdb-navbar>
+  <!--/.Navbar-->

@@ -52,8 +52,9 @@ namespace MMSAPI.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete([FromQuery] string id)
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete(string id)
         {
             try
             {
@@ -79,6 +80,7 @@ namespace MMSAPI.Controllers
         }
 
         [HttpGet]
+        [Route("all")]
         public IActionResult GetAll()
         {
             try

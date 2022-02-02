@@ -1,31 +1,46 @@
 import { CommonModule } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { NavComponent } from './nav/nav.component';
+import { MDBBootstrapModule } from 'angular-bootstrap-md';
+import { LoginComponent } from './login/login.component';
+import { CreateComponent } from './create/create.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { TextMaskModule } from 'angular2-text-mask/src/angular2TextMask';
-import { AtomsInputComponent } from './components/atoms/atoms-input/atoms-input.component';
+import { CustomModalComponent } from './custom-modal/custom-modal.component';
+import { ToastrModule } from 'ngx-toastr';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AppRoutingModule } from '../app-routing.module';
+import { InfobarComponent } from './infobar/infobar.component';
 
 @NgModule({
     imports: [
-        CommonModule,
-        HttpClientModule,
         FormsModule,
+        CommonModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        AppRoutingModule,
         ReactiveFormsModule,
-        RouterModule,
-        //FontAwesomeModule,
-        RouterModule,
-        NgbModule,
-        MaterialModule,
-        QuillModule.forRoot(),
-        NgSelectModule,
-        TextMaskModule,
+        ToastrModule,
+        NgxUiLoaderModule,
+        MDBBootstrapModule.forRoot()
     ],
+
+    declarations: [
+        NavComponent,
+        LoginComponent,
+        CreateComponent,
+        CustomModalComponent,
+        InfobarComponent,
+    ],
+
     exports: [
-        AtomsInputComponent
-    ],
-    declarations: [SharedComponent],
-    providers: [],
+        NavComponent,
+        LoginComponent,
+        CreateComponent,
+        CustomModalComponent,
+        InfobarComponent,
+    ]
 })
 export class SharedModule { }
+

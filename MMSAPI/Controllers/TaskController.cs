@@ -94,12 +94,34 @@ namespace MMSAPI.Controllers
             }
         }
 
+
         [HttpGet]
+        [Route("all/{sprintid}")]
+        public IActionResult GetAll(string sprintid)
+        {
+            try
+            {
+                var allTasks = _taskRepository.GetAll();
+                var taskOnSprint = allTasks.Where(t =>
+                {
+                    var st = t.SprintTasks.Where(s => s.Sprint_Id.Equals(sprintid)).ToList();
+                    return st != null && st.Count > 0;
+                });
+                return Ok(taskOnSprint.Select(s => TaskDTO.FromModel(s)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        [Route("all")]
         public IActionResult GetAll()
         {
             try
             {
-                return Ok(_taskRepository.GetAll().Select(s => TaskDTO.FromModel(s)));
+                return Ok(_taskRepository.GetAll());
             }
             catch (Exception ex)
             {

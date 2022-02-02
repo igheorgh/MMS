@@ -41,6 +41,7 @@ namespace MMSAPI.Controllers
 
 
         [HttpPost]
+        [Route("create")]
         public async Task<ActionResult> Create([FromBody] UserDTO dto)
         {
             dto.Roles = "USER";

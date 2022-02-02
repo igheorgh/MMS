@@ -1,0 +1,34 @@
+<form class="text-center" [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+
+    <div class="form-group">
+        <label for="taskName">Nume task:</label>
+        <input type="text" formControlName="taskName" id="taskName" class="form-control"
+            placeholder="Name">
+        <div *ngIf="checkInput(f.taskName)">
+            <small class="text-danger" *ngIf="f.taskName.errors.required">Numele este obligatoriu</small>
+        </div>
+
+    </div>
+    <div class="form-group">
+        <label for="taskCode">Descriere:</label>
+        <input type="text" formControlName="description" id="description" class="form-control"
+            placeholder="description">
+        <div *ngIf="checkInput(f.description)">
+            <small class="text-danger" *ngIf="f.taskCode.errors.required">Descrierea este obligatorie</small>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="taskCode">Status:</label>
+        <input type="text" formControlName="status" id="status" class="form-control"
+            placeholder="status">
+        <div *ngIf="checkInput(f.status)">
+            <small class="text-danger" *ngIf="f.taskCode.errors.required">Statusul este obligatoriu</small>
+        </div>
+    </div>
+
+    <button mdbBtn color="info" block="true" class="my-4" type="submit" *ngIf="taskService.selectedTask != null">Actualizeaza</button>
+    <button mdbBtn color="info" block="true" class="my-4" type="submit" *ngIf="taskService.selectedTask == null">Creeaza</button>
+    <button mdbBtn color="warning" block="true" class="my-4" type="button" (click)="reinitForms(true)">Sterge</button>
+
+</form>
