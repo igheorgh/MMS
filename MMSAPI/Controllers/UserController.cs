@@ -39,6 +39,19 @@ namespace MMSAPI.Controllers
         public SignInManager<User> SignInManager { get; }
         public RoleManager<IdentityRole> RoleManager { get; }
 
+        [HttpGet]
+        [Route("all")]
+        public IActionResult GetAll()
+        {
+            try
+            {
+                return Ok(UserRepository.GetAll().Select(u => UserDTO.FromModel(u)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
         [HttpPost]
         [Route("create")]

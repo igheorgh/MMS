@@ -44,8 +44,8 @@ export class TaskService {
         return this.http.delete(this.appSettings.baseApiUrl + "task/" + task.id);
     }
 
-    public getAllTasks(): Observable<TaskModel[]>{
-        return this.http.get<TaskModel[]>(this.appSettings.baseApiUrl + "task/all").pipe(map(list => {
+    public getAllTasks(sprint_id: string): Observable<TaskModel[]>{
+        return this.http.get<TaskModel[]>(this.appSettings.baseApiUrl + "task/all/" + sprint_id).pipe(map(list => {
             this.taskList = list;
             return list;
         }));

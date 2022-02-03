@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TaskModel } from 'src/app/shared/models/taskModel';
 import { TaskService } from 'src/app/shared/services/task.service';
 import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
 import { UserService } from 'src/app/shared/services/user.service';
+import { SprintModel } from 'src/app/shared/models/sprintModel';
+import { UserModel } from 'src/app/shared/models/userModel';
+import { SprintService } from 'src/app/shared/services/sprint.service';
 
 @Component({
     selector: 'app-task-create',
@@ -16,10 +19,26 @@ export class TaskCreateComponent implements OnInit {
     public otherErrorsDiv = null;
     public otherErrorsDivPassword = null;
     public otherErrorsDivTwofa = null;
-    constructor(public taskService: TaskService, private formBuilder: FormBuilder, private router: Router,
-        private customService: CustomLoaderService, private userService: UserService) { 
-            this.taskService.selectedTaskChanged.subscribe(_ => {
-                this.reinitForms();
+
+
+    public sprintsList: SprintModel[];
+    public usersList: UserModel[];
+
+    constructor(public taskService: TaskService, private formBuilder: FormBuilder, private router: Router, public changeDetector: ChangeDetectorRef,
+        private customService: CustomLoaderService, private userService: UserService, private sprintService: SprintService) { 
+            this.sprintService.getAllSprints().subscribe(sprints => {
+                this.sprintsList = sprints;
+                this.userService.getAllUsers().subscribe(users => {
+                    this.usersList = users;
+                    this.taskService.selectedTaskChanged.subscribe(_ => {
+                        this.reinitForms();
+                    });
+                    this.changeDetector.detectChanges();
+                    let cSprint = sprints.find(b => b.id == this.taskService.selectedTask.sprint_id);
+                    let cUser = users.find(b => b.id == this.taskService.selectedTask.user_id);
+                    (document.getElementById('sprintSelect') as any).value = this.selectedSprint = cSprint.id;
+                    (document.getElementById('userSelect') as any).value = this.selectedUser = cUser.id;  
+                });
             });
         }
 
@@ -36,7 +55,8 @@ export class TaskCreateComponent implements OnInit {
         this.taskForm = this.formBuilder.group({
             taskName: [this.taskService.selectedTask?.name, [Validators.required]],
             description: [this.taskService.selectedTask?.description, [Validators.required]],
-            status: [this.taskService.selectedTask?.status, [Validators.required]],
+            sprintSelect: ['', []],
+            userSelect: ['', []],
         });
     }
 
@@ -52,15 +72,13 @@ export class TaskCreateComponent implements OnInit {
                 id: this.taskService.selectedTask.id,
                 name: this.f.taskName.value,
                 description: this.f.description.value,
-                status: this.f.status.value,
+                sprint_id: this.selectedSprint,
+                user_id: this.selectedUser
             }).subscribe(r => {
                 this.otherErrorsDiv = "";
                 this.reinitForms();
                 this.customService.success('Taskul a fost actualizat!', 'Success');
                 this.taskService.hideCreateForm();
-                // this.taskService.getAllTasks().subscribe(resp => {
-                //     this.customService.stop();
-                // }, this.customService.errorFromResp)
             }, this.customService.errorFromResp);
         }
         else {
@@ -68,17 +86,25 @@ export class TaskCreateComponent implements OnInit {
             this.taskService.createTask(<TaskModel>{
                 name: this.f.taskName.value,
                 description: this.f.description.value,
-                status: this.f.status.value
+                sprint_id: this.selectedSprint,
+                user_id: this.selectedUser
             }).subscribe(response => {
                 this.otherErrorsDiv = "";
                 this.reinitForms();
                 this.customService.success('Taskul a fost creat!', 'Success');
                 this.taskService.hideCreateForm();
-                // this.taskService.getAllTasks().subscribe(resp => {
-                //     this.customService.stop();
-                // }, this.customService.errorFromResp);
             }, this.customService.errorFromResp);
         }
+    }
+
+    selectedSprint: string = '-1';
+    sprintChanged(event) {
+        this.selectedSprint = event;
+    }
+
+    selectedUser: string = '-1';
+    userChanged(event) {
+        this.selectedUser = event
     }
     
 }

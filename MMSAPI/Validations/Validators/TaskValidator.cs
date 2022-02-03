@@ -25,21 +25,18 @@ namespace MMSAPI.Validations.Validators
 
             dbEntity.Description = newEntity.Description;
             dbEntity.Name = newEntity.Name;
-            dbEntity.Status = newEntity.Status;
+            //dbEntity.Status = newEntity.Status;
             dbEntity.User_Id = newEntity.User_Id;
             dbEntity.User = userRepo.GetById(newEntity.User_Id);
 
             dbEntity.SprintTasks = new HashSet<SprintTask>();
-            for (int i = 0; i < newEntity.SprintTasks.Count; i++)
+            dbEntity.SprintTasks.Add(new SprintTask
             {
-                dbEntity.SprintTasks.Add(new SprintTask
-                {
-                    Task = dbEntity,
-                    Sprint = sprintRepo.GetById(newEntity.SprintTasks.ElementAt(i).Sprint_Id),
-                    Task_Id = dbEntity.Id,
-                    Sprint_Id = newEntity.SprintTasks.ElementAt(i).Sprint_Id
-                });
-            }
+                Task = dbEntity,
+                Sprint = sprintRepo.GetById(newEntity.SprintTasks.ElementAt(0).Sprint_Id),
+                Task_Id = dbEntity.Id,
+                Sprint_Id = newEntity.SprintTasks.ElementAt(0).Sprint_Id
+            });
         }
 
         protected override List<ValidationKeyValue> validate()
@@ -48,7 +45,7 @@ namespace MMSAPI.Validations.Validators
 
             validationResult.ValidateString("description", dbEntity.Description, 10, 200);
             validationResult.ValidateString("name", dbEntity.Name, 10, 50);
-            validationResult.ValidateString("status", dbEntity.Status, 1, 25);
+            //validationResult.ValidateString("status", dbEntity.Status, 1, 25);
 
             validationResult.RequireObject("user", dbEntity.User);
             for (int i = 0; i < dbEntity.SprintTasks.Count; i++)

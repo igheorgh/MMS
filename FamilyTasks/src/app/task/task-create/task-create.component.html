@@ -19,11 +19,25 @@
     </div>
 
     <div class="form-group">
-        <label for="taskCode">Status:</label>
-        <input type="text" formControlName="status" id="status" class="form-control"
-            placeholder="status">
-        <div *ngIf="checkInput(f.status)">
-            <small class="text-danger" *ngIf="f.taskCode.errors.required">Statusul este obligatoriu</small>
+        <label for="sprintSelect">Sprint:</label>
+        <select class="form-control"  formControlName="sprintSelect" id="sprintSelect" (change)="sprintChanged($event.target.value)">
+            <option selected disabled>Alege un sprint</option>
+            <option *ngFor="let p of sprintsList" value="{{p.id}}">{{p.name}}</option>
+        </select>
+        <div *ngIf="f.sprintSelect.dirty || f.sprintSelect.touched">
+            <small class="text-danger" *ngIf="selectedSprint == '-1'">Sprintul este obligatoriu</small>
+        </div>
+    </div>
+
+    
+    <div class="form-group">
+        <label for="userSelect">User:</label>
+        <select class="form-control"  formControlName="userSelect" id="userSelect" (change)="userChanged($event.target.value)">
+            <option selected disabled>Alege un user</option>
+            <option *ngFor="let p of usersList" value="{{p.id}}">{{p.username}}</option>
+        </select>
+        <div *ngIf="f.userSelect.dirty || f.userSelect.touched">
+            <small class="text-danger" *ngIf="selectedUser == '-1'">Userul este obligatoriu</small>
         </div>
     </div>
 

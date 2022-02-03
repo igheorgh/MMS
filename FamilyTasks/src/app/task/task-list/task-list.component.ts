@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { TaskModel } from 'src/app/shared/models/taskModel';
 import { TaskService } from 'src/app/shared/services/task.service';
 import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
+import { SprintService } from 'src/app/shared/services/sprint.service';
 
 @Component({
     selector: 'app-task-list',
@@ -12,7 +13,7 @@ import { CustomLoaderService } from 'src/app/shared/services/customLoader.servic
 
 export class TaskListComponent implements OnInit {
     constructor(public taskService: TaskService, private customService: CustomLoaderService, 
-        private changeDetector: ChangeDetectorRef, private router: Router) { }
+        private changeDetector: ChangeDetectorRef, private router: Router, private sprintService: SprintService) { }
 
     @ViewChild('taskNameFilter') taskNameFilter: HTMLInputElement;
     detectChange(){
@@ -22,7 +23,7 @@ export class TaskListComponent implements OnInit {
 
     ngOnInit() {
         this.customService.start();
-        this.taskService.getAllTasks().subscribe(r => {
+        this.taskService.getAllTasks(this.sprintService.selectedSprint.id).subscribe(r => {
             this.customService.stop();
         }, this.customService.errorFromResp);
      }
@@ -34,7 +35,7 @@ export class TaskListComponent implements OnInit {
      deleteTask(task: TaskModel){
         this.taskService.deleteTask(task).subscribe(r => {
                 this.customService.success('Taskul a fost sters!', 'Success');
-                  this.taskService.getAllTasks().subscribe(resp => {
+                  this.taskService.getAllTasks(this.sprintService.selectedSprint.id).subscribe(resp => {
                       this.customService.stop();
                   }, this.customService.errorFromResp)
         }, this.customService.errorFromResp)
@@ -43,5 +44,9 @@ export class TaskListComponent implements OnInit {
      seeTasks(task: TaskModel){
         this.taskService.selectedTask = task;
         this.router.navigate(['/tasks']);
+     }
+
+     statusChanged(event){
+         
      }
 }

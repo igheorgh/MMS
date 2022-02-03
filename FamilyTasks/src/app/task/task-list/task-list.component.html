@@ -17,6 +17,7 @@
           <th>Nume task</th>
           <th>Descriere</th>
           <th>Status</th>
+          <th>Responsabil</th>
           <th>Vezi Task</th>
           <th>Modifica</th>
           <th>Sterge</th>
@@ -28,7 +29,14 @@
             <th scope="row">{{(i+1)}}</th>
             <td>{{task.name}}</td>
             <td>{{task.description}}</td>
-            <td>{{task.status}}</td>
+            <td>
+              <select class="form-control" id="statusSelect" (change)="statusChanged($event.target.value)">
+                <option value="todo" [selected]="task.status == 'todo'">To Do</option>
+                <option value="inprogress" [selected]="task.status == 'inprogress'">In Progress</option>
+                <option value="done" [selected]="task.status == 'done'">Done</option>
+            </select>
+            </td>
+            <td>{{task.username}}</td>
             <td>
               <button mdbBtn color="info" block="true" size="sm" type="button" (click)="seeTasks(task)"><mdb-icon fas icon="eye"></mdb-icon></button>
             </td>

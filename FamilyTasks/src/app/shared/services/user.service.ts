@@ -120,4 +120,12 @@ export class UserService {
             return user;
         }));
     }
+
+    public userList: UserModel[] = []; 
+    public getAllUsers(): Observable<UserModel[]>{
+        return this.http.get<UserModel[]>(this.appSettings.baseApiUrl + "user/all").pipe(map(list => {
+            this.userList = list;
+            return list;
+        }));
+    }
 }

@@ -61,7 +61,7 @@ namespace MMSAPI.Repository
             }
             catch (Exception ex)
             {
-                return null;
+                return entity;
             }
         }
 

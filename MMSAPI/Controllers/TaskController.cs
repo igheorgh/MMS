@@ -6,6 +6,7 @@ using AutoMapper;
 using DataLibrary.DTO;
 using System.Linq;
 using MMSAPI.Validations;
+using System.Collections.Generic;
 
 namespace MMSAPI.Controllers
 {
@@ -46,12 +47,16 @@ namespace MMSAPI.Controllers
             var atra = task.ToModel();
             atra.Id = Guid.NewGuid().ToString();
             atra.User = _userRepository.GetById(atra.User_Id);
-            for (int i = 0; i < task.SprintTasks.Count; i++)
+            var sprint = _sprintRepository.GetById(task.Sprint_id);
+            atra.Status = "todo";
+            atra.SprintTasks = new HashSet<SprintTask>();
+            atra.SprintTasks.Add(new SprintTask
             {
-                atra.SprintTasks.ElementAt(i).Task = atra;
-                atra.SprintTasks.ElementAt(i).Sprint = _sprintRepository.GetById(atra.SprintTasks.ElementAt(i).Sprint_Id);
-                atra.SprintTasks.ElementAt(i).Task_Id = atra.Id;
-            }
+                Task = atra,
+                Sprint = sprint,
+                Sprint_Id = sprint.Id,
+                Task_Id = atra.Id
+            });
             return atra;
         }
 
@@ -121,7 +126,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_taskRepository.GetAll());
+                return Ok(_taskRepository.GetAll().Select(t => TaskDTO.FromModel(t)));
             }
             catch (Exception ex)
             {

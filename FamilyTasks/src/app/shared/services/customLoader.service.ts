@@ -25,7 +25,13 @@ export class CustomLoaderService {
 
      public errorFromResp =  (error: any) => {
             this.stop();
-            this.error(error.error.message, 'Cererea a esuat!');
+
+            let errorMsg = "";
+            error.error.validationResults.forEach(element => {
+                errorMsg += `${element.fieldError}`;
+            });
+
+            this.error(error.error.message, errorMsg);
      }
 
      public defaultError =  (_) => {

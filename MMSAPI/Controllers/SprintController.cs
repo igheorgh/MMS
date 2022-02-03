@@ -85,7 +85,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_sprintRepository.GetAll().Select(s => SprintDTO.FromModel(s)));
+                return Ok(_sprintRepository.GetAll());
             }
             catch (Exception ex)
             {

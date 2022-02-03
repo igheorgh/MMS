@@ -27,40 +27,40 @@ namespace DataLibrary.DTO
         public string Status { get; set; }
 
         [DataMember]
-        [JsonProperty("sprintTasks")]
-        public ICollection<SprintTaskDTO> SprintTasks { get; set; }
-
-        [DataMember]
         [JsonProperty("comments")]
         public ICollection<CommentDTO> Comments { get; set; }
 
         [DataMember]
-        [JsonProperty("user_Id")]
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        [DataMember]
+        [JsonProperty("user_id")]
         public string User_Id { get; set; }
 
         [DataMember]
-        [JsonProperty("user")]
-        public UserDTO User { get; set; }
+        [JsonProperty("sprint_id")]
+        public string Sprint_id { get; set; }
+
         public TaskDTO()
         {
-            User = new UserDTO();
             Comments = new HashSet<CommentDTO>();
-            SprintTasks = new HashSet<SprintTaskDTO>();
         }
 
         public static TaskDTO FromModel(AppTask model)
         {
             if (model == null) return null;
+            var firstSprint = model.SprintTasks.FirstOrDefault();
             return new TaskDTO()
             {
                 Id = model.Id, 
                 Name = model.Name, 
                 Description = model.Description, 
                 Status = model.Status, 
-                SprintTasks = model.SprintTasks.Select(st => SprintTaskDTO.FromModel(st)).ToList(), 
+                Sprint_id = firstSprint != null ? firstSprint.Sprint_Id : string.Empty, 
                 Comments = model.Comments.Select(c => CommentDTO.FromModel(c)).ToList(), 
                 User_Id = model.User_Id, 
-                User = UserDTO.FromModel(model.User), 
+                Username = model.User.UserName
             }; 
         }
 
@@ -72,10 +72,12 @@ namespace DataLibrary.DTO
                 Name = Name, 
                 Description = Description, 
                 Status = Status, 
-                SprintTasks = SprintTasks.Select(st => st.ToModel()).ToList(), 
+                SprintTasks = new HashSet<SprintTask>() { new SprintTask {
+                    Task = new AppTask { Id = this.Id}, Task_Id = this.Id,
+                    Sprint = new Sprint { Id = this.Sprint_id}, Sprint_Id = this.Sprint_id
+                } }, 
                 Comments = Comments.Select(c => c.ToModel()).ToList(), 
-                User_Id = User_Id, 
-                User = User.ToModel(), 
+                User_Id = User_Id,
             }; 
         }
     }
