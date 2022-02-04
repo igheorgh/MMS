@@ -1,6 +1,8 @@
 ﻿using DataLibrary;
 using DataLibrary.DTO;
 using DataLibrary.Models;
+using DataLibrary.StatePattern;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,6 +11,10 @@ namespace MMSAPI.Repository
     public class UserRepository : BaseRepository<User>, IUserRepository
     {
         public UserRepository(MMSContext dbContext) : base(dbContext) { }
+
+
+
+     
         //public async Task<User> GetById(string id)
         //{
         //    return await Task.FromResult(DbContext.Users.Where(a => a.Id == id).FirstOrDefault());

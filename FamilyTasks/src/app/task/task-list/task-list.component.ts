@@ -43,7 +43,7 @@ export class TaskListComponent implements OnInit {
 
      seeTasks(task: TaskModel){
         this.taskService.selectedTask = task;
-        this.router.navigate(['/tasks']);
+        this.router.navigate(['/tasks/'+task.id]);
      }
 
      statusChanged(event){

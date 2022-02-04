@@ -1,0 +1,21 @@
+      <div class="card col-sm-6 text-center" style="align-items: center;margin: 0 auto;">
+      <form [formGroup]="this.form">
+        <div class="form-group">
+          <label for="oras">Name</label>
+          <input type="text" class="form-control" placeholder="ex: Paris" formControlName="name" readonly>
+        </div>
+        <div class="form-group">
+          <label for="pret">Description</label>
+          <input type="text" class="form-control" formControlName="description" readonly>
+        </div>
+        <div class="form-group">
+          <label for="denumire">Status</label>
+          <select class="form-control" formControlName="status" id="statusSelect" (change)="statusChanged($event.target.value)">
+            <option value="ToDo" [selected]="task.status == 'ToDo'">To Do</option>
+            <option value="InProgress" [selected]="task.status == 'InProgress'">In Progress</option>
+            <option value="Done" [selected]="task.status == 'Done'">Done</option>
+        </select>
+      </div>
+        <button type="submit" class="btn btn-primary mb-2" id="updateStatus" (click)="UpdateStatus()">Update Status</button>
+    </form>
+</div>

@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using DataLibrary.Models;
 using System.Collections.Generic;
+using DataLibrary.StatePattern;
 
 namespace DataLibrary.DTO
 {
@@ -42,6 +43,8 @@ namespace DataLibrary.DTO
         [JsonProperty("sprint_id")]
         public string Sprint_id { get; set; }
 
+        [JsonIgnore]
+        public State State { get; set; }
         public TaskDTO()
         {
             Comments = new HashSet<CommentDTO>();

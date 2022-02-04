@@ -4,6 +4,7 @@ using System;
 using DataLibrary.Models;
 using AutoMapper;
 using DataLibrary.DTO;
+using DataLibrary.StatePattern;
 using System.Linq;
 using MMSAPI.Validations;
 using System.Collections.Generic;
@@ -45,10 +46,10 @@ namespace MMSAPI.Controllers
         private AppTask GenerateTask(TaskDTO task)
         {
             var atra = task.ToModel();
+            atra.State = new AssignedState();
             atra.Id = Guid.NewGuid().ToString();
             atra.User = _userRepository.GetById(atra.User_Id);
             var sprint = _sprintRepository.GetById(task.Sprint_id);
-            atra.Status = "todo";
             atra.SprintTasks = new HashSet<SprintTask>();
             atra.SprintTasks.Add(new SprintTask
             {
@@ -57,6 +58,8 @@ namespace MMSAPI.Controllers
                 Sprint_Id = sprint.Id,
                 Task_Id = atra.Id
             });
+            atra.State.Change(atra);
+            _taskRepository.AssignTaskEmail(atra);
             return atra;
         }
 
@@ -87,11 +90,11 @@ namespace MMSAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromQuery] string Id)
+        public IActionResult GetById(string id)
         {
             try
             {
-                return Ok(TaskDTO.FromModel(_taskRepository.GetById(Id)));
+                return Ok(TaskDTO.FromModel(_taskRepository.GetById(id)));
             }
             catch (Exception ex)
             {
@@ -132,6 +135,24 @@ namespace MMSAPI.Controllers
             {
                 return BadRequest();
             }
+        }
+        [HttpPut("done/{taskID}")]
+        public void CompleteTask([FromRoute] string taskID)
+        {
+            _taskRepository.CompleteTask(taskID);
+
+        }
+
+        [HttpPut("inprogress/{taskID}")]
+        public void StartTask([FromRoute] string taskID)
+        {
+            _taskRepository.StatTask(taskID);
+        }
+
+        [HttpPut("todo/{taskID}")]
+        public void ToDoTask([FromRoute] string taskID)
+        {
+            _taskRepository.AssignTask(taskID);
         }
     }
 }

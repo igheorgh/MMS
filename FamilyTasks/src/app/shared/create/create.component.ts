@@ -34,6 +34,7 @@ export class CreateComponent implements OnInit {
   public activateResponse: LoginResponse = null;
   public downloadedPk = false;
   onSubmit(){ 
+    console.log("Aici")
     if (this.registerForm.invalid) {
       return;
     }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using DataLibrary.StatePattern;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataLibrary.Models
 {
@@ -8,6 +10,8 @@ namespace DataLibrary.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public string Status { get; set; }
+        [NotMapped]
+        public State State { get; set; }
 
         public virtual ICollection<SprintTask> SprintTasks { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }

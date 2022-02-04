@@ -24,6 +24,7 @@ import { TaskService } from './shared/services/task.service';
 import { TaskComponent } from './task/task.component';
 import { TaskListComponent } from './task/task-list/task-list.component';
 import { TaskCreateComponent } from './task/task-create/task-create.component';
+import { TaskUpdateComponent } from './task/task-update/task-update.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { TaskCreateComponent } from './task/task-create/task-create.component';
     SprintCreateComponent,
     TaskComponent,
     TaskListComponent,
-    TaskCreateComponent
+    TaskCreateComponent,
+    TaskUpdateComponent
   ],
   imports: [
     CommonModule,

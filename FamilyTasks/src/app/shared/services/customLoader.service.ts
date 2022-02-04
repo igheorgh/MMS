@@ -27,9 +27,9 @@ export class CustomLoaderService {
             this.stop();
 
             let errorMsg = "";
-            error.error.validationResults.forEach(element => {
-                errorMsg += `${element.fieldError}`;
-            });
+            // error.error.validationResults.forEach(element => {
+            //     errorMsg += `${element.fieldError}`;
+            // });
 
             this.error(error.error.message, errorMsg);
      }
