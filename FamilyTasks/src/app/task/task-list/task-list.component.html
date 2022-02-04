@@ -30,10 +30,10 @@
             <td>{{task.name}}</td>
             <td>{{task.description}}</td>
             <td>
-              <select class="form-control" id="statusSelect" (change)="statusChanged($event.target.value)">
-                <option value="todo" [selected]="task.status == 'ToDo'">To Do</option>
-                <option value="inprogress" [selected]="task.status == 'InProgress'">In Progress</option>
-                <option value="done" [selected]="task.status == 'Done'">Done</option>
+              <select class="form-control" id="statusSelect" (change)="statusChanged(task, $event.target.value)">
+                <option value="ToDo" [selected]="task.status == 'ToDo'">To Do</option>
+                <option value="InProgress" [selected]="task.status == 'InProgress'">In Progress</option>
+                <option value="Done" [selected]="task.status == 'Done'">Done</option>
             </select>
             </td>
             <td>{{task.username}}</td>

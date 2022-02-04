@@ -46,7 +46,16 @@ export class TaskListComponent implements OnInit {
         this.router.navigate(['/tasks/'+task.id]);
      }
 
-     statusChanged(event){
-         
+     statusChanged(task: TaskModel, event){
+        task.status = event;
+        if(task.status == "InProgress"){
+          this.taskService.InProgressStatus(task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+        }
+        if(task.status == "Done"){
+          this.taskService.DoneStatus(task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+        }
+        if(task.status == "ToDo"){
+          this.taskService.ToDoStatus(task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+        }
      }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskModel } from 'src/app/shared/models/taskModel';
+import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
 import { TaskService } from 'src/app/shared/services/task.service';
 import { TaskListComponent } from '../task-list/task-list.component';
 
@@ -15,7 +16,8 @@ export class TaskUpdateComponent implements OnInit {
     id: string
     task : TaskModel
     form: FormGroup;
-    constructor(public taskService: TaskService,private formBuilder: FormBuilder, public router: Router, private route :ActivatedRoute) {
+    constructor(public taskService: TaskService,private formBuilder: FormBuilder, public router: Router,
+       private route :ActivatedRoute, private customService: CustomLoaderService) {
       
      }
 
@@ -41,22 +43,32 @@ export class TaskUpdateComponent implements OnInit {
     this.form.patchValue({description:task.description});
     this.form.patchValue({name:task.name});
   }
-  UpdateStatus(){
-    this.task.status = this.form.get("status").value
-    if(this.task.status == "InProgress"){
-      this.taskService.InProgressStatus(this.task).subscribe(res=>{})
-    //  this.router.navigate(['/tasks']);
-    }
-    if(this.task.status == "Done"){
-      this.taskService.DoneStatus(this.task).subscribe(res=>{})
-     // this.router.navigate(['/tasks']);
-    }
-    if(this.task.status == "ToDo"){
-      this.taskService.ToDoStatus(this.task).subscribe(res=>{})
-     // this.router.navigate(['/tasks']);
-    }
-  }
+  // UpdateStatus(){
+  //   this.task.status = this.form.get("status").value
+  //   if(this.task.status == "InProgress"){
+  //     this.taskService.InProgressStatus(this.task).subscribe(res=>{})
+  //   //  this.router.navigate(['/tasks']);
+  //   }
+  //   if(this.task.status == "Done"){
+  //     this.taskService.DoneStatus(this.task).subscribe(res=>{})
+  //    // this.router.navigate(['/tasks']);
+  //   }
+  //   if(this.task.status == "ToDo"){
+  //     this.taskService.ToDoStatus(this.task).subscribe(res=>{})
+  //    // this.router.navigate(['/tasks']);
+  //   }
+  // }
 
   statusChanged(event){
+    this.task.status = event;
+    if(this.task.status == "InProgress"){
+      this.taskService.InProgressStatus(this.task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+    }
+    if(this.task.status == "Done"){
+      this.taskService.DoneStatus(this.task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+    }
+    if(this.task.status == "ToDo"){
+      this.taskService.ToDoStatus(this.task).subscribe(res=>{this.customService.success('Taskul a fost actualizat!', 'Success');})
+    }
   }
 }
