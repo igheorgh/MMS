@@ -53,14 +53,13 @@ namespace DataLibrary.DTO
         public static TaskDTO FromModel(AppTask model)
         {
             if (model == null) return null;
-            var firstSprint = model.SprintTasks.FirstOrDefault();
             return new TaskDTO()
             {
                 Id = model.Id, 
                 Name = model.Name, 
                 Description = model.Description, 
                 Status = model.Status, 
-                Sprint_id = firstSprint != null ? firstSprint.Sprint_Id : string.Empty, 
+                Sprint_id = model.Sprint_Id,
                 Comments = model.Comments.Select(c => CommentDTO.FromModel(c)).ToList(), 
                 User_Id = model.User_Id, 
                 Username = model.User.UserName
@@ -75,10 +74,8 @@ namespace DataLibrary.DTO
                 Name = Name, 
                 Description = Description, 
                 Status = Status, 
-                SprintTasks = new HashSet<SprintTask>() { new SprintTask {
-                    Task = new AppTask { Id = this.Id}, Task_Id = this.Id,
-                    Sprint = new Sprint { Id = this.Sprint_id}, Sprint_Id = this.Sprint_id
-                } }, 
+                Sprint = new Sprint { Id = this.Sprint_id},
+                Sprint_Id =this.Sprint_id,
                 Comments = Comments.Select(c => c.ToModel()).ToList(), 
                 User_Id = User_Id,
             }; 

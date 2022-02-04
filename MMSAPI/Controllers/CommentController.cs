@@ -61,10 +61,12 @@ namespace MMSAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromQuery]string id)
+        public IActionResult Delete(string id)
         {
             try
             {
+                var comm = _commentRepository.GetById(id);
+                if (comm.User_Id != User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value) return Unauthorized();
                 return Ok(_commentRepository.Delete(id));
             }
             catch (Exception ex)

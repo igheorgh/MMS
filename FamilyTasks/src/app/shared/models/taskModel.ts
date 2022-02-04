@@ -1,3 +1,5 @@
+import { CommentModel } from "./commentModel";
+
 export class TaskModel{
     public status: string;
     public description: string;
@@ -6,6 +8,7 @@ export class TaskModel{
     public user_id: string;
     public sprint_id: string;
     public username: string;
+    public comments: CommentModel[];
 
     constructor(init: Partial<TaskModel>) {
         Object.assign(this, init);

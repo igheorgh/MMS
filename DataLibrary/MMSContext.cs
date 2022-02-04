@@ -18,7 +18,6 @@ namespace DataLibrary
         public virtual DbSet<Comment> Comments { get; set; }
         public virtual DbSet<Sprint> Sprints { get; set; }
         public virtual DbSet<Models.AppTask> Tasks { get; set; }
-        public virtual DbSet<SprintTask> SprintTasks { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -43,7 +42,11 @@ namespace DataLibrary
 
                 entity.HasOne<User>(t => t.User)
                     .WithMany(u => u.Tasks)
-                    .HasForeignKey(t => t.User_Id);
+                    .HasForeignKey(t => t.User_Id).OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne<Sprint>(t => t.Sprint)
+                    .WithMany(t => t.Tasks)
+                    .HasForeignKey(t => t.Sprint_Id).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Comment>(entity =>
@@ -52,30 +55,20 @@ namespace DataLibrary
 
                 entity.HasOne<User>(c => c.User)
                     .WithMany(u => u.Comments)
-                    .HasForeignKey(c => c.User_Id);
+                    .HasForeignKey(c => c.User_Id).OnDelete(DeleteBehavior.Cascade);
 
 
                 entity.HasOne<AppTask>(c => c.Task)
                     .WithMany(t => t.Comments)
-                    .HasForeignKey(c => c.Task_Id);
+                    .HasForeignKey(c => c.Task_Id).OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<Sprint>(entity =>
             {
                 entity.HasKey(e => e.Id);
+
             });
 
-            modelBuilder.Entity<SprintTask>(entity => {
-                entity.HasKey(st => new { st.Sprint_Id, st.Task_Id });
-
-                entity.HasOne<Sprint>(st => st.Sprint)
-                    .WithMany(s => s.SprintTasks)
-                    .HasForeignKey(st => st.Sprint_Id);
-
-                entity.HasOne<AppTask>(st => st.Task)
-                    .WithMany(t => t.SprintTasks)
-                    .HasForeignKey(st => st.Task_Id);
-            });
 
             OnModelCreatingPartial(modelBuilder);
             base.OnModelCreating(modelBuilder);

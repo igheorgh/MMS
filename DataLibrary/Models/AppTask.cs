@@ -13,7 +13,8 @@ namespace DataLibrary.Models
         [NotMapped]
         public State State { get; set; }
 
-        public virtual ICollection<SprintTask> SprintTasks { get; set; }
+        public virtual Sprint Sprint { get; set; }
+        public string Sprint_Id { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }
 
         public string User_Id { get; set; }
@@ -21,7 +22,6 @@ namespace DataLibrary.Models
 
         public AppTask()
         {
-            SprintTasks = new HashSet<SprintTask>();
             Comments = new HashSet<Comment>();
         }
     }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { SprintModel } from 'src/app/shared/models/sprintModel';
 import { SprintService } from 'src/app/shared/services/sprint.service';
 import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
+import { TaskService } from 'src/app/shared/services/task.service';
 
 @Component({
     selector: 'app-sprint-list',
@@ -12,7 +13,7 @@ import { CustomLoaderService } from 'src/app/shared/services/customLoader.servic
 
 export class SprintListComponent implements OnInit {
     constructor(public sprintService: SprintService, private customService: CustomLoaderService, 
-        private changeDetector: ChangeDetectorRef, private router: Router) { }
+        private changeDetector: ChangeDetectorRef, private router: Router, public taskService: TaskService) { }
 
     @ViewChild('sprintNameFilter') sprintNameFilter: HTMLInputElement;
     detectChange(){
@@ -41,6 +42,7 @@ export class SprintListComponent implements OnInit {
      }
 
      seeTasks(sprint: SprintModel){
+        this.taskService.hideCreateForm();
         this.sprintService.selectedSprint = sprint;
         this.router.navigate(['/tasks']);
      }

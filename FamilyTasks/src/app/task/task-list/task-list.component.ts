@@ -5,6 +5,7 @@ import { TaskModel } from 'src/app/shared/models/taskModel';
 import { TaskService } from 'src/app/shared/services/task.service';
 import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
 import { SprintService } from 'src/app/shared/services/sprint.service';
+import { TaskOperationType } from 'src/app/shared/strategies/tasks/TaskOperationTypes';
 
 @Component({
     selector: 'app-task-list',

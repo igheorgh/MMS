@@ -12,6 +12,7 @@ export class TaskComponent implements OnInit {
     
     public createMode: boolean = false;
 
+    public sprintName: string;
     constructor(public taskService: TaskService, public sprintService: SprintService, public router: Router) {
         this.taskService.selectedTaskChanged.subscribe(data => {
             this.createMode = data.showCreate;
@@ -19,6 +20,7 @@ export class TaskComponent implements OnInit {
      }
 
     ngOnInit() {
+        this.sprintName = this.sprintService.selectedSprint.name;
         if(this.sprintService.selectedSprint == null){
             this.router.navigate(['/sprints']);
         }

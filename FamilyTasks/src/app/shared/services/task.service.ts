@@ -5,6 +5,9 @@ import { Observable, Subject } from 'rxjs';
 import { AppSettings } from 'src/app/app.settings';
 import { map } from 'rxjs/operators';
 import { TaskListComponent } from 'src/app/task/task-list/task-list.component';
+import { TaskStatusStrategy } from '../strategies/tasks/strategies/TaskStatusChangeStartegy';
+import { TaskOperationType } from '../strategies/tasks/TaskOperationTypes';
+import { TaskContext } from '../strategies/tasks/TaskContext';
 
 export class TaskChangedModel {
     task: TaskModel;
@@ -22,6 +25,7 @@ export class TaskService {
     constructor(private appSettings: AppSettings, private http: HttpClient) {
         this.selectedTaskChanged = new Subject<TaskChangedModel>();
     }
+
 
     public showCreateForm(selectedTask: TaskModel = null) {
         this.selectedTask = selectedTask;
@@ -80,5 +84,16 @@ export class TaskService {
 
     DoneStatus(task: TaskModel) {
         return this.http.put(this.appSettings.baseApiUrl + "task/done/" + task.id, task)
+    }
+
+    AddComment(task: TaskModel, comment: string){
+        return this.http.post(this.appSettings.baseApiUrl + "comment", {
+            task_Id: task.id,
+            description: comment
+        });
+    }
+
+    DeleteComment(commentId: string){
+        return this.http.delete(this.appSettings.baseApiUrl + "comment/" + commentId);
     }
 }

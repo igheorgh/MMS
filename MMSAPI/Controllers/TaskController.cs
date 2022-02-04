@@ -49,15 +49,7 @@ namespace MMSAPI.Controllers
             atra.State = new AssignedState();
             atra.Id = Guid.NewGuid().ToString();
             atra.User = _userRepository.GetById(atra.User_Id);
-            var sprint = _sprintRepository.GetById(task.Sprint_id);
-            atra.SprintTasks = new HashSet<SprintTask>();
-            atra.SprintTasks.Add(new SprintTask
-            {
-                Task = atra,
-                Sprint = sprint,
-                Sprint_Id = sprint.Id,
-                Task_Id = atra.Id
-            });
+            atra.Sprint = _sprintRepository.GetById(task.Sprint_id);
             atra.State.Change(atra);
             _taskRepository.AssignTaskEmail(atra);
             return atra;
@@ -109,13 +101,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                var allTasks = _taskRepository.GetAll();
-                var taskOnSprint = allTasks.Where(t =>
-                {
-                    var st = t.SprintTasks.Where(s => s.Sprint_Id.Equals(sprintid)).ToList();
-                    return st != null && st.Count > 0;
-                });
-                return Ok(taskOnSprint.Select(s => TaskDTO.FromModel(s)));
+                return Ok(_taskRepository.GetAll().Where(t => t.Sprint_Id.Equals(sprintid)).Select(s => TaskDTO.FromModel(s)));
             }
             catch (Exception ex)
             {

@@ -32,10 +32,10 @@ namespace DataLibrary.DTO
 
         [DataMember]
         [JsonProperty("sprintTasks")]
-        public ICollection<SprintTaskDTO> SprintTasks { get; set; }
+        public ICollection<TaskDTO> Tasks { get; set; }
         public SprintDTO()
         {
-            SprintTasks = new HashSet<SprintTaskDTO>();
+            Tasks = new HashSet<TaskDTO>();
         }
 
         public static SprintDTO FromModel(Sprint model)
@@ -47,8 +47,8 @@ namespace DataLibrary.DTO
                 Name = model.Name, 
                 Start_Date = model.Start_Date, 
                 End_Date = model.End_Date, 
-                Goal = model.Goal, 
-                SprintTasks = model.SprintTasks.Select(st => SprintTaskDTO.FromModel(st)).ToList(), 
+                Goal = model.Goal,
+                Tasks = model.Tasks.Select(st => TaskDTO.FromModel(st)).ToList(), 
             }; 
         }
 
@@ -60,8 +60,8 @@ namespace DataLibrary.DTO
                 Name = Name, 
                 Start_Date = Start_Date, 
                 End_Date = End_Date, 
-                Goal = Goal, 
-                SprintTasks = SprintTasks.Select(st => st.ToModel()).ToList(), 
+                Goal = Goal,
+                Tasks = Tasks.Select(st => st.ToModel()).ToList(), 
             }; 
         }
     }

@@ -1,23 +1,57 @@
-<app-infobar [Route]="'Task:' + task.name" [BackButtonValue]="'/tasks'"></app-infobar>
+<app-infobar [Route]="'Task:'" [BackButtonValue]="'/tasks'"></app-infobar>
 
-<div class="card col-md-10 text-center" style="align-items: center;margin: 0 auto;">
-  <form [formGroup]="this.form">
+<div class="container" style="align-items: center;margin: 0 auto;" *ngIf="task != undefined">
+  <form>
     <div class="form-group">
       <h3>{{task.name}}</h3>
-      <!-- <input type="text" class="form-control" formControlName="name" readonly> -->
     </div>
     <div class="form-group">
       <p>{{task.description}}</p>
     </div>
     <div class="form-group">
       <label for="denumire">Status</label>
-      <select class="form-control" formControlName="status" id="statusSelect"
-        (change)="statusChanged($event.target.value)">
+      <select class="form-control" id="statusSelect" (change)="statusChanged($event.target.value)">
         <option value="ToDo" [selected]="task.status == 'ToDo'">To Do</option>
         <option value="InProgress" [selected]="task.status == 'InProgress'">In Progress</option>
         <option value="Done" [selected]="task.status == 'Done'">Done</option>
       </select>
     </div>
-    <!-- <button type="submit" class="btn btn-primary mb-2" id="updateStatus" (click)="UpdateStatus()">Update Status</button> -->
+  </form>
+
+  <form [formGroup]="this.form">
+    <h3>Comentarii:</h3>
+    <div class="row" style="max-height: 300px; overflow-y: scroll;">
+      <div class="col">
+        <div class="row"  style="border: 1px solid black; margin-top: 5px;" *ngFor="let com of task.comments">
+          <div class="col">
+            <div class="row">
+              <div class="col" style="border-bottom: 1px solid black;"><b>{{com.username}}</b></div>
+            </div>
+            <div class="row">
+              <div class="col-md-10">
+                {{com.description}}
+              </div>
+              <div class="col-md-2" *ngIf="username == com.username">
+                <button type="submit" class="btn btn-danger mb-2" (click)="deleteComment(com.id)">Sterge</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 20px;">
+      <div class="col-md-2">
+        <label for="comment">Comentariu:</label>
+      </div>
+      <div class="col-md-8">
+        <input type="text" formControlName="comment" id="comment" class="form-control" placeholder="Comment">
+        <div *ngIf="checkInput(f.comment)">
+          <small class="text-danger" *ngIf="f.comment.errors.required">Un comentariu este obligatoriu</small>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary mb-2" (click)="addComment()">Adauga</button>
+      </div>
+    </div>
   </form>
 </div>

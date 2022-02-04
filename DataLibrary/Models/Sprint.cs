@@ -10,10 +10,10 @@ namespace DataLibrary.Models
         public DateTime Start_Date  { get; set; }
         public DateTime End_Date { get; set; } 
         public string Goal { get;set; }
-        public virtual ICollection<SprintTask> SprintTasks { get; set; }
+        public virtual ICollection<AppTask> Tasks { get; set; }
         public Sprint()
         {
-            SprintTasks = new HashSet<SprintTask>();
+            Tasks = new HashSet<AppTask>();
         }
     }
 }
