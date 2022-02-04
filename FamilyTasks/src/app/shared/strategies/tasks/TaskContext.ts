@@ -8,7 +8,7 @@ import { TaskOperationStrategy } from "./TaskOperationStrategy";
 import { TaskOperationType } from "./TaskOperationTypes";
 
 export class TaskContext {
-    taskStrategies: TaskOperationStrategy[];
+    taskStrategies: TaskOperationStrategy[] = [];
     status: string;
     constructor(opType: TaskOperationType, task: TaskModel,  http: HttpClient, baseApiUrl: string, status: string = ''){
         this.status = status;

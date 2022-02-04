@@ -117,7 +117,7 @@ namespace MMSAPI.Controllers
         public async Task<ActionResult> Login([FromBody] AuthRequest model)
         {
             var userFromModel = await UserManager.FindByNameAsync(model.username);
-            if (userFromModel == null) return BadRequest("Credentialele sunt invalide!");
+            if (userFromModel == null) return BadRequest("Credentialele nu sunt invalide!");
 
             var loginResult = await SignInManager.PasswordSignInAsync(userFromModel.UserName, model.password, false, false);
             if (loginResult.Succeeded)
@@ -132,7 +132,7 @@ namespace MMSAPI.Controllers
                 });
             }
 
-            return BadRequest("Credentialele sunt invalide!");
+            return BadRequest("Credentialele nu sunt invalide!");
         }
 
         private async Task<string> GenerateJwtToken(string email, User user, bool? rememberMe)

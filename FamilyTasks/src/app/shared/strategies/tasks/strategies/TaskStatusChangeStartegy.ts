@@ -9,7 +9,7 @@ export class TaskStatusStrategy extends TaskOperationStrategy{
     }
     applyStrategy(status: string): Observable<any> {
         if(status == 'ToDo') return this.ToDoStatus(this.task);
-        if(status == 'InProgress') return this.ToDoStatus(this.task);
+        if(status == 'InProgress') return this.InProgressStatus(this.task);
         return this.DoneStatus(this.task);
     }
 

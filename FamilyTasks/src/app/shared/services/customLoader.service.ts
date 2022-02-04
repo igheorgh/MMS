@@ -20,18 +20,25 @@ export class CustomLoaderService {
      }
 
      public error =  (message: string, title: string) => {
-         this.toastr.error(message, title);
+         this.toastr.error(message, title,  {
+            enableHtml: true,
+        });
      }
 
      public errorFromResp =  (error: any) => {
             this.stop();
 
             let errorMsg = "";
-            // error.error.validationResults.forEach(element => {
-            //     errorMsg += `${element.fieldError}`;
-            // });
+            if(error.error.validationResults != null && error.error.validationResults != undefined){
+                error.error.validationResults.forEach(element => {
+                    errorMsg += `<div class="row"><div class="col">${element.fieldError}</div></div>`;
+                });
+            }
+            else{
+                errorMsg = error.error;
+            }
 
-            this.error(error.error.message, errorMsg);
+            this.error(errorMsg, "Eroare");
      }
 
      public defaultError =  (_) => {

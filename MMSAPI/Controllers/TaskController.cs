@@ -69,7 +69,7 @@ namespace MMSAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete([FromQuery] string id)
+        public IActionResult Delete(string id)
         {
             try
             {

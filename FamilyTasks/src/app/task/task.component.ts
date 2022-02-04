@@ -14,6 +14,9 @@ export class TaskComponent implements OnInit {
 
     public sprintName: string;
     constructor(public taskService: TaskService, public sprintService: SprintService, public router: Router) {
+        if(this.sprintService.selectedSprint == null){
+            this.router.navigate(['/sprints']);
+        }
         this.taskService.selectedTaskChanged.subscribe(data => {
             this.createMode = data.showCreate;
         });

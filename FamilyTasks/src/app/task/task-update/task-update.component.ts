@@ -53,6 +53,7 @@ export class TaskUpdateComponent implements OnInit {
       this.customService.success('Comentariul a fost adaugat!', 'Success');
       this.taskService.GetTaskById(this.id).subscribe(res => {
         this.task = res;
+        this.createForm();
         this.customService.stop();
       })
     })

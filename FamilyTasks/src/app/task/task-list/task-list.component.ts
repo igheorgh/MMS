@@ -34,6 +34,7 @@ export class TaskListComponent implements OnInit {
   }
 
   deleteTask(task: TaskModel) {
+    this.customService.start();
     this.taskService.performTaskOperation(TaskOperationType.TaskDelete, task).subscribe(r => {
       this.customService.success('Taskul a fost sters!', 'Success');
       this.taskService.getAllTasks(this.sprintService.selectedSprint.id).subscribe(resp => {
@@ -49,8 +50,10 @@ export class TaskListComponent implements OnInit {
 
   statusChanged(task: TaskModel, event) {
     task.status = event;
+    this.customService.start();
     this.taskService.performTaskOperation(TaskOperationType.TaskStatus, task, event).subscribe(res => {
        this.customService.success('Taskul a fost actualizat!', 'Success'); 
+       this.customService.stop();
     });
   }
 }
