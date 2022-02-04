@@ -5,6 +5,7 @@ import { TaskModel } from 'src/app/shared/models/taskModel';
 import { CustomLoaderService } from 'src/app/shared/services/customLoader.service';
 import { TaskService } from 'src/app/shared/services/task.service';
 import { UserService } from 'src/app/shared/services/user.service';
+import { TaskOperationType } from 'src/app/shared/strategies/tasks/TaskOperationTypes';
 import { TaskListComponent } from '../task-list/task-list.component';
 
 @Component({
@@ -60,24 +61,11 @@ export class TaskUpdateComponent implements OnInit {
   statusChanged(event) {
     this.customService.start();
     this.task.status = event;
-    if (this.task.status == "InProgress") {
-      this.taskService.InProgressStatus(this.task).subscribe(res => {
-        this.customService.success('Taskul a fost actualizat!', 'Success');
-        this.customService.stop();
-      })
-    }
-    if (this.task.status == "Done") {
-      this.taskService.DoneStatus(this.task).subscribe(res => {
-        this.customService.success('Taskul a fost actualizat!', 'Success');
-        this.customService.stop();
-      })
-    }
-    if (this.task.status == "ToDo") {
-      this.taskService.ToDoStatus(this.task).subscribe(res => {
-        this.customService.success('Taskul a fost actualizat!', 'Success');
-        this.customService.stop();
-      })
-    }
+    
+    this.taskService.performTaskOperation(TaskOperationType.TaskStatus, this.task, event).subscribe(res => {
+      this.customService.success('Taskul a fost actualizat!', 'Success');
+      this.customService.stop();
+    });
   }
 
   deleteComment(commentId: string){

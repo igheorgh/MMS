@@ -8,6 +8,7 @@ import { UserService } from 'src/app/shared/services/user.service';
 import { SprintModel } from 'src/app/shared/models/sprintModel';
 import { UserModel } from 'src/app/shared/models/userModel';
 import { SprintService } from 'src/app/shared/services/sprint.service';
+import { TaskOperationType } from 'src/app/shared/strategies/tasks/TaskOperationTypes';
 
 @Component({
     selector: 'app-task-create',
@@ -68,7 +69,7 @@ export class TaskCreateComponent implements OnInit {
         }
         if (this.taskService.selectedTask != null) {
             this.customService.start();
-            this.taskService.updateTask(<TaskModel>{
+            this.taskService.performTaskOperation(TaskOperationType.TaskEdit, <TaskModel>{
                 id: this.taskService.selectedTask.id,
                 name: this.f.taskName.value,
                 description: this.f.description.value,
