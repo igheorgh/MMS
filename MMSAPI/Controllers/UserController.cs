@@ -173,7 +173,9 @@ namespace MMSAPI.Controllers
         [Authorize(Roles = "USER")]
         public async Task<ActionResult> Edit([FromBody] UserDTO dto)
         {
-            dto.Id = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserID");//?.Value;
+            if (userId == null) return Unauthorized();
+            dto.Id = userId.Value;
             var response = UserRepository.Edit(dto.ToModel());
             var newUser = UserRepository.GetById(dto.Id);
 

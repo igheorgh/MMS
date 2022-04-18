@@ -62,6 +62,12 @@ namespace MMSApi.Tests.Users
             var userRepository = new Mock<IUserRepository>();
             userRepository.Setup(x => x.GetAll()).Returns(Users);
             userRepository.Setup(x => x.GetById(It.IsAny<string>())).Returns((string id) => Users.FirstOrDefault(u => u.Id == id));
+            userRepository.Setup(x => x.Edit(It.IsAny<User>())).Returns((User user) => {
+                    var usrId = Users.FindIndex(u => u.Id == u.Id);
+                    Users[usrId] = user;
+                    return user;
+                }
+            );
 
             var dbContext = new Mock<MMSContext>();
             dbContext.Setup(x => x.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(1);
@@ -158,6 +164,114 @@ namespace MMSApi.Tests.Users
             var meUser = (await Controller.GetMe() as OkObjectResult).Value as UserDTO;
             // Assert
             Assert.Equal(TestUser.Id, meUser.Id);
+        }
+
+        [Fact]
+        public async void LogoutUserThatIsSignedIn()
+        {
+            //Act
+            var result = await GetTestUserLoginData();
+            Assert.Equal(200, result.StatusCode);
+            var authResponse = result.Value as AuthResponse;
+
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.jwt);
+            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
+
+            Controller.ControllerContext = new ControllerContext();
+            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
+            var logoutResult = await Controller.Logout() as ObjectResult;
+            // Assert
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async void EditUserInformation()
+        {
+            var userToUpdate = new UserDTO
+            {
+                Email = "test_user3@gmail.com",
+                Password = "Password123",
+                UserName = "test_user3"
+            };
+            //Act
+            var result = (await Controller.Create(userToUpdate) as OkObjectResult).Value as AuthResponse;
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(result.jwt);
+            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
+            Controller.ControllerContext = new ControllerContext();
+            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
+
+            userToUpdate.Email = "test_userEmail@gmail.com";
+            userToUpdate.UserName = "test_userEmail";
+            //Act
+            var editResult = (await Controller.Edit(userToUpdate) as OkObjectResult).Value as AuthResponse;
+            // Assert
+            Assert.Equal(editResult.email, userToUpdate.Email);
+            Assert.Equal(editResult.username, userToUpdate.UserName);
+            Assert.NotNull(editResult.jwt);
+        }
+
+        [Fact]
+        public async void EditUserBadEmailInfo()
+        {
+            var userToUpdate = new UserDTO
+            {
+                Email = "test_user6@gmail.com",
+                Password = "Password123",
+                UserName = "test_user6"
+            };
+            //Act
+            var result = (await Controller.Create(userToUpdate) as OkObjectResult).Value as AuthResponse;
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(result.jwt);
+            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
+            Controller.ControllerContext = new ControllerContext();
+            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
+
+            userToUpdate.Email = "";
+            userToUpdate.UserName = "test_userEmail";
+            //Act
+            var editResult = await Controller.Edit(userToUpdate) as BadRequestResult;
+            // Assert
+            Assert.Equal(400, editResult.StatusCode);
+        }
+
+        [Fact]
+        public async void EditUserWithoutAuth()
+        {
+            var userToUpdate = new UserDTO
+            {
+                Email = "test_user5@gmail.com",
+                Password = "Password123",
+                UserName = "test_user5"
+            };
+            //Act
+            Controller.ControllerContext = new ControllerContext();
+            Controller.ControllerContext.HttpContext = new DefaultHttpContext();
+            var editResult = await Controller.Edit(userToUpdate) as UnauthorizedResult;
+            // Assert
+            Assert.Equal(401, editResult.StatusCode);
+        }
+
+        [Fact]
+        public async void ChangePasswordWithInvalidCredentials()
+        {
+            //Act
+            var result = await GetTestUserLoginData();
+            Assert.Equal(200, result.StatusCode);
+            var authResponse = result.Value as AuthResponse;
+
+            var token = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.jwt);
+            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
+
+            Controller.ControllerContext = new ControllerContext();
+            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
+
+            var passResult = (await Controller.EditPassword(new UserController.PasswordRequest
+            {
+                currentPassword = "somePassword",
+                newPassword = "someNewPassword"
+            })) as BadRequestResult;
+            // Assert
+            Assert.Equal(400, passResult.StatusCode);
         }
     }
 }
