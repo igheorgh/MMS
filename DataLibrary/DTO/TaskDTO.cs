@@ -53,6 +53,8 @@ namespace DataLibrary.DTO
         public static TaskDTO FromModel(AppTask model)
         {
             if (model == null) return null;
+            if (model.User == null) return null;
+            if (model.Comments == null) return null;
             return new TaskDTO()
             {
                 Id = model.Id, 

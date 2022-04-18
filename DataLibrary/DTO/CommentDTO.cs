@@ -42,6 +42,7 @@ namespace DataLibrary.DTO
         public static CommentDTO FromModel(Comment model)
         {
             if (model == null) return null;
+            if (model.User == null) return null;
             return new CommentDTO()
             {
                 Id = model.Id,

@@ -45,7 +45,9 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(UserRepository.GetAll().Select(u => UserDTO.FromModel(u)));
+                var allUsers = UserRepository.GetAll();
+                var usersDTO = allUsers.Select(u => UserDTO.FromModel(u)).ToList();
+                return Ok(usersDTO);
             }
             catch (Exception ex)
             {

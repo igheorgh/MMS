@@ -78,8 +78,8 @@ namespace DataLibrary.DTO
                 LastName = model.LastName, 
                 Roles = model.Roles, 
                 Description = model.Description, 
-                Comments = model.Comments.Select(c => CommentDTO.FromModel(c)).ToList(), 
-                Tasks = model.Tasks.Select(t => TaskDTO.FromModel(t)).ToList(), 
+                Comments = model.Comments.Select(c => { c.User = model; return CommentDTO.FromModel(c); }).ToList(), 
+                Tasks = model.Tasks.Select(t => { t.User = model; return TaskDTO.FromModel(t); }).ToList(), 
             }; 
         }
 
