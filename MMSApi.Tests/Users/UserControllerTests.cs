@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace MMSApi.Tests.Users
+namespace MMSApi.Tests.Comments
 {
     public class UserControllerTests : IClassFixture<TestFixture<Startup>>
     {

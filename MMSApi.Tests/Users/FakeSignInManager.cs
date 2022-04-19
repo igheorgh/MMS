@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MMSApi.Tests.Users
+namespace MMSApi.Tests.Comments
 {
     public class FakeSignInManager : SignInManager<User>
     {
