@@ -19,7 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace MMSApi.Tests.Users
+namespace MMSApi.Tests.Comments
 {
     public class UserControllerTests : IClassFixture<TestFixture<Startup>>
     {

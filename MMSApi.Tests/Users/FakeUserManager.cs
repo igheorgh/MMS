@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 
-namespace MMSApi.Tests.Users
+namespace MMSApi.Tests.Comments
 {
     public class FakeUserManager : UserManager<User>
     {

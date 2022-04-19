@@ -9,9 +9,20 @@ using System.Text;
 
 namespace MMSApi.Tests.Comments
 {
-    public static class UserHelpers
+    public static class CommentsHelper
     {
-        public static Fixture GetFixtureForUsers()
+        public static List<Comment> GenerateComments(int count)
+        {
+            var comments = new List<Comment>();
+            var fixture = GetFixtureForComments();
+            for (int i = 0; i < count; i++)
+            {
+                comments.Add(fixture.Create<Comment>());
+            }
+            return comments;
+        }
+
+        private static Fixture GetFixtureForComments()
         {
             var fixture = new Fixture();
             fixture
@@ -26,18 +37,8 @@ namespace MMSApi.Tests.Comments
                     typeof(DataLibrary.StatePattern.State),
                     typeof(AssignedState))
             );
-            return fixture;
-        }
 
-        public static List<User> GenerateUsers(int count)
-        {
-            var users = new List<User>();
-            var fixture = GetFixtureForUsers();
-            for(int i = 0; i < count; i++)
-            {
-                users.Add(fixture.Create<User>());
-            }
-            return users;
+            return fixture;
         }
     }
 }

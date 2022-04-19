@@ -93,7 +93,9 @@ namespace MMSAPI.Controllers
         {
             try
             {
-                return Ok(_commentRepository.GetAll().Select(s => CommentDTO.FromModel(s)));
+                var allComments = _commentRepository.GetAll();
+                var commentsDTO = allComments.Select(c => CommentDTO.FromModel(c)).ToList();
+                return Ok(commentsDTO);
             }
             catch (Exception ex)
             {
