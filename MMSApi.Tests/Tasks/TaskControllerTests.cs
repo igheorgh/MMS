@@ -37,7 +37,7 @@ namespace MMSApi.Tests.Tasks
             TaskDTO task = new TaskDTO
             {
                 Id = Guid.NewGuid().ToString(),
-                Name = "test", 
+                Name = "test",
                 Description = "DescriptioTest",
 
                 Status = "Status",
