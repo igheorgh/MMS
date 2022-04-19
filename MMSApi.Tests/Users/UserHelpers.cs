@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MMSApi.Tests.Comments
+namespace MMSApi.Tests.Users
 {
     public static class UserHelpers
     {
