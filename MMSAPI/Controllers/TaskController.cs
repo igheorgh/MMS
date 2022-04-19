@@ -43,7 +43,7 @@ namespace MMSAPI.Controllers
             }
         }
 
-        private AppTask GenerateTask(TaskDTO task)
+        public AppTask GenerateTask(TaskDTO task)
         {
             var atra = task.ToModel();
             atra.State = new AssignedState();
