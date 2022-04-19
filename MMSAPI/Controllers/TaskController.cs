@@ -8,6 +8,7 @@ using DataLibrary.StatePattern;
 using System.Linq;
 using MMSAPI.Validations;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MMSAPI.Controllers
 {
@@ -43,7 +44,7 @@ namespace MMSAPI.Controllers
             }
         }
 
-        private AppTask GenerateTask(TaskDTO task)
+        public AppTask GenerateTask(TaskDTO task)
         {
             var atra = task.ToModel();
             atra.State = new AssignedState();
@@ -122,19 +123,20 @@ namespace MMSAPI.Controllers
                 return BadRequest();
             }
         }
+        [ExcludeFromCodeCoverage]
         [HttpPut("done/{taskID}")]
         public void CompleteTask([FromRoute] string taskID)
         {
             _taskRepository.CompleteTask(taskID);
 
         }
-
+        [ExcludeFromCodeCoverage]
         [HttpPut("inprogress/{taskID}")]
         public void StartTask([FromRoute] string taskID)
         {
             _taskRepository.StatTask(taskID);
         }
-
+        [ExcludeFromCodeCoverage]
         [HttpPut("todo/{taskID}")]
         public void ToDoTask([FromRoute] string taskID)
         {
