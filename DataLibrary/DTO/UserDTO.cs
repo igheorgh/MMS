@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using DataLibrary.Models;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace DataLibrary.DTO
 {
@@ -99,6 +100,11 @@ namespace DataLibrary.DTO
                 Comments = Comments.Select(c => c.ToModel()).ToList(), 
                 Tasks = Tasks.Select(t => t.ToModel()).ToList(), 
             }; 
+        }
+
+        public static implicit operator ClaimsPrincipal(UserDTO v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

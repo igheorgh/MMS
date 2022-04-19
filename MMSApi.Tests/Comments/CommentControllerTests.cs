@@ -2,18 +2,22 @@
 using DataLibrary.DTO;
 using DataLibrary.Models;
 using FakeItEasy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MMSAPI;
 using MMSAPI.Controllers;
 using MMSAPI.Models;
 using MMSAPI.Repository;
 using MMSAPI.Validations;
+using MMSAPI.Validations.Models;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace MMSApi.Tests.Comments
@@ -31,6 +35,7 @@ namespace MMSApi.Tests.Comments
 
         private List<Comment> Comments = new List<Comment>();
         private List<User> Users = new List<User>();
+        private List<AppTask> Tasks = new List<AppTask>();
 
         private CommentDTO TestComment = new CommentDTO
         {
@@ -51,16 +56,18 @@ namespace MMSApi.Tests.Comments
             _taskController = A.Fake<TaskController>();
 
             var commentRepository = new Mock<ICommentRepository>();
-            
+
 
             Comments = CommentsHelper.GenerateComments(5);
             Users = UserHelpers.GenerateUsers(6);
 
             var modelComment = TestComment.ToModel();
-          //  commentRepository.Setup()
 
             commentRepository.Setup(c => c.GetAll()).Returns(Comments);
             commentRepository.Setup(c => c.GetById(It.IsAny<string>())).Returns((string id) => Comments.FirstOrDefault(c => c.Id == id));
+
+            var taskRepository = new Mock<ITaskRepository>();
+            taskRepository.Setup(x => x.GetById(It.IsAny<string>())).Returns((string id) => Tasks.FirstOrDefault(u => u.Id == id));
 
             var userRepository = new Mock<IUserRepository>();
             userRepository.Setup(x => x.GetAll()).Returns(Users);
@@ -75,7 +82,7 @@ namespace MMSApi.Tests.Comments
             var dbContext = new Mock<MMSContext>();
             dbContext.Setup(x => x.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(1);
 
-            Controller = new CommentController(commentRepository.Object, userRepository.Object, null, null);
+            Controller = new CommentController(commentRepository.Object, userRepository.Object, _entityUpdateHandler, taskRepository.Object);
         }
 
 
@@ -89,7 +96,7 @@ namespace MMSApi.Tests.Comments
         }
 
         [Fact]
-        public void CreateComment()
+        public async Task CreateCommentWithInvalidData()
         {
             var beforeCount = Comments.Count;
             var newComment = new CommentDTO
@@ -99,18 +106,106 @@ namespace MMSApi.Tests.Comments
                 User_Id = Users.FirstOrDefault().Id,
                 Task_Id = Guid.NewGuid().ToString(),
             };
+            var user = new Mock<ClaimsPrincipal>();
+
+            Controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = user.Object
+                }
+            };
+            //Act
+            var response = Controller.Create(newComment);
+
+            Assert.Equal(400, ((Microsoft.AspNetCore.Mvc.ObjectResult)response).StatusCode);
+        }
+
+        [Fact]
+        public async Task CreateComment()
+        {
+            var beforeCount = Comments.Count;
+            var newComment = new CommentDTO
+            {
+                Description = "Description",
+                Date_Posted = DateTime.UtcNow,
+                User_Id = Users.FirstOrDefault().Id,
+                Task_Id = Guid.NewGuid().ToString(),
+            };
+            var user = new Mock<ClaimsPrincipal>();
+            var userModel = new UserDTO
+            {
+                Id = Guid.NewGuid().ToString(),
+                Email = "test_user@gmail.com",
+                Password = "Password123",
+                UserName = "test_user"
+            };
+            var claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, userModel.UserName));
+            claims.Add(new Claim(ClaimTypes.Email, userModel.Email));
+
+
+            var identity = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            Controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = identity,
+                }
+            };
             //Act
             //var result = (Controller.Create(newComment) as OkObjectResult).Value as CommentDTO;
             var response = Controller.Create(newComment);
-            var httpResponse = response as OkObjectResult;
-            Assert.Equal(200, httpResponse.StatusCode);
+            var result = (response as OkObjectResult).Value as CommentDTO;
+            var httpResult = response as BadRequestResult;
+            Assert.Equal(400, ((Microsoft.AspNetCore.Mvc.ObjectResult)response).StatusCode);
             // Assert
-           /* Assert.Equal(result.Description, newComment.Description);
+            Assert.Equal(result.Description, newComment.Description);
             Assert.Equal(result.Date_Posted, newComment.Date_Posted);
             Assert.Equal(result.User_Id, newComment.User_Id);
             Assert.Equal(result.Task_Id, newComment.Task_Id);
 
-            Assert.Equal(Comments.Count, beforeCount + 1);*/
+            Assert.Equal(Comments.Count, beforeCount + 1);
+        }
+
+        [Fact]
+        public async Task DeleteCommentWithNullID()
+        {
+            //Act
+            var actionResult = Controller.Delete(null) as BadRequestResult;
+
+            //Assert
+            Assert.NotNull(actionResult);   
+        }
+
+        [Fact]
+        public async Task GetCommentByExistingId()
+        {
+            //Arrange
+            var comment = Comments.First();
+
+            //Act
+            var actionResult = Controller.GetById(comment.Id) as OkObjectResult;
+
+            //Assert
+            Assert.NotNull(actionResult);
+
+            var response = actionResult.Value as CommentDTO;
+            Assert.Equal(comment.Id, response.Id);
+        }
+
+        [Fact]
+        public async Task UpdateComment()
+        {
+            //Arrange
+            var comment = Comments.First();
+
+            //Act
+            var actionResult = Controller.Update(CommentDTO.FromModel(comment)) as ObjectResult;
+
+            //Assert
+            Assert.NotNull(actionResult);
+            Assert.Equal(200, actionResult.StatusCode);
         }
     }
 }
