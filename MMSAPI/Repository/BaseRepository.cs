@@ -65,11 +65,6 @@ namespace MMSAPI.Repository
             }
         }
 
-        public ICollection<T> Find(Expression<Func<T, bool>> expression)
-        {
-            return _context.Set<T>().Where(expression).ToList();
-        }
-
         public ICollection<T> GetAll()
         {
             return _context.Set<T>().ToList();

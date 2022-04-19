@@ -20,5 +20,25 @@ namespace MMSApi.Tests.Comments
                   new Mock<ILogger<SignInManager<User>>>().Object,
                   null, null)
         { }
+
+        public static FakeSignInManager GetFakeSignInManager()
+        {
+            var signInManager = new Mock<FakeSignInManager>();
+
+            signInManager.Setup(
+                    x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .ReturnsAsync((string username, string password, bool isPersistent, bool lockoutOnFailuer) =>
+                {
+                    var user = FakeUserRepository.UserList.Find(u => u.UserName.ToLower().Equals(username.ToLower()));
+                    if (user == null) return SignInResult.Failed;
+                    if (user.PasswordHash.Equals(password))
+                    {
+                        return SignInResult.Success;
+                    }
+                    return SignInResult.Failed;
+                });
+
+            return signInManager.Object;
+        }
     }
 }

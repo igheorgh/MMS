@@ -28,10 +28,10 @@ namespace MMSAPI.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] SprintDTO sprint)
         {
-            var atra = sprint.ToModel();
-            atra.Id = Guid.NewGuid().ToString();
             try
             {
+                var atra = sprint.ToModel();
+                atra.Id = Guid.NewGuid().ToString();
                 return Ok(SprintDTO.FromModel(_sprintRepository.Add(atra)));
             }
             catch (Exception ex)
@@ -44,6 +44,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
+                if (sprint == null) throw new ArgumentNullException();
                 return EntityUpdateHandler.Update<Sprint>(sprint.ToModel()).ToHttpResponse();
             }
             catch (Exception ex)
@@ -58,6 +59,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(id)) throw new ArgumentNullException();
                 return Ok(_sprintRepository.Delete(id));
             }
             catch (Exception ex)
@@ -71,6 +73,7 @@ namespace MMSAPI.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(id)) throw new ArgumentNullException();
                 return Ok(SprintDTO.FromModel(_sprintRepository.GetById(id)));
             }
             catch (Exception ex)

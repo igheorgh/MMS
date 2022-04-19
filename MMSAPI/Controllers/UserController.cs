@@ -173,8 +173,9 @@ namespace MMSAPI.Controllers
         [Authorize(Roles = "USER")]
         public async Task<ActionResult> Edit([FromBody] UserDTO dto)
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserID");//?.Value;
-            if (userId == null) return Unauthorized();
+            if (User == null) return Unauthorized();
+
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserID");
             dto.Id = userId.Value;
             var response = UserRepository.Edit(dto.ToModel());
             var newUser = UserRepository.GetById(dto.Id);
@@ -215,10 +216,6 @@ namespace MMSAPI.Controllers
                 var result = await UserManager.ResetPasswordAsync(user, token, model.newPassword);
 
                 loginResult = await SignInManager.PasswordSignInAsync(user.UserName, model.newPassword, false, false);
-                if (!loginResult.Succeeded)
-                {
-                    return BadRequest("Credentialele sunt invalide!");
-                }
                 return Ok(new AuthResponse
                 {
                     username = user.UserName,

@@ -1,22 +1,11 @@
-﻿using AutoMapper;
-using DataLibrary;
-using DataLibrary.DTO;
-using DataLibrary.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using DataLibrary.DTO;
 using Microsoft.AspNetCore.Mvc;
 using MMSAPI;
 using MMSAPI.Controllers;
 using MMSAPI.Models;
-using MMSAPI.Repository;
-using Moq;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace MMSApi.Tests.Comments
@@ -26,60 +15,11 @@ namespace MMSApi.Tests.Comments
 
         private UserController Controller { get; }
 
-        private List<User> Users = new List<User>();
-        private UserDTO TestUser = new UserDTO
-        {
-            Id = Guid.NewGuid().ToString(),
-            Email = "test_user@gmail.com",
-            Password = "Password123",
-            UserName = "test_user"
-        };
-
-        private int NoOfUsers = 6;
+        private int InitialUsersNumber = 10;
 
         public UserControllerTests(TestFixture<Startup> fixture)
         {
-            Users = UserHelpers.GenerateUsers(NoOfUsers);
-            var modelUser = TestUser.ToModel();
-            modelUser.Roles = "USER,ADMIN";
-            Users.Add(modelUser);
-
-            var fakeUserManager = new Mock<FakeUserManager>();
-
-            fakeUserManager.Setup(x => x.Users)
-                .Returns(Users.AsQueryable());
-
-            fakeUserManager.Setup(x => x.DeleteAsync(It.IsAny<User>()))
-             .ReturnsAsync(IdentityResult.Success);
-            fakeUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), It.IsAny<string>()))
-            .ReturnsAsync(IdentityResult.Success).Callback((User user, string pass) => Users.Add(user));
-            fakeUserManager.Setup(x => x.UpdateAsync(It.IsAny<User>()))
-          .ReturnsAsync(IdentityResult.Success);
-            fakeUserManager.Setup(x => x.FindByNameAsync(It.IsAny<string>()))
-          .ReturnsAsync((string userName) => Users.FirstOrDefault(u => u.UserName.ToLower().Equals(userName.ToLower())));
-
-
-            var userRepository = new Mock<IUserRepository>();
-            userRepository.Setup(x => x.GetAll()).Returns(Users);
-            userRepository.Setup(x => x.GetById(It.IsAny<string>())).Returns((string id) => Users.FirstOrDefault(u => u.Id == id));
-            userRepository.Setup(x => x.Edit(It.IsAny<User>())).Returns((User user) => {
-                    var usrId = Users.FindIndex(u => u.Id == u.Id);
-                    Users[usrId] = user;
-                    return user;
-                }
-            );
-
-            var dbContext = new Mock<MMSContext>();
-            dbContext.Setup(x => x.SaveChangesAsync(CancellationToken.None)).ReturnsAsync(1);
-
-
-            var signInManager = new Mock<FakeSignInManager>();
-
-            signInManager.Setup(
-                    x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
-
-            Controller = new UserController(dbContext.Object, fakeUserManager.Object, signInManager.Object, null, userRepository.Object);
+            Controller = UserHelpers.GetUserControllerWithMockedDependencies(InitialUsersNumber);
         }
 
         [Fact]
@@ -88,14 +28,14 @@ namespace MMSApi.Tests.Comments
             //Act
             var result = (Controller.GetAll() as OkObjectResult).Value as List<UserDTO>;
             // Assert
-            Assert.Equal(result.Count(), Users.Count);
+            Assert.Equal(result.Count(), FakeUserRepository.UserList.Count);
         }
 
 
         [Fact]
         public async void CreateUser()
         {
-            var beforeCount = Users.Count;
+            var beforeCount = FakeUserRepository.UserList.Count;
             var newUser = new UserDTO
             {
                 Email = "test_user2@gmail.com",
@@ -108,102 +48,71 @@ namespace MMSApi.Tests.Comments
             Assert.Equal(result.email, newUser.Email);
             Assert.Equal(result.username, newUser.UserName);
             Assert.NotNull(result.jwt);
-            Assert.Equal(Users.Count, beforeCount + 1);
+            Assert.Equal(FakeUserRepository.UserList.Count, beforeCount + 1);
         }
 
-        private async Task<ObjectResult> GetTestUserLoginData(AuthRequest authRequest = null)
-        {
-            if (authRequest == null) authRequest = new AuthRequest
-            {
-                username = TestUser.UserName,
-                password = TestUser.Password
-            };
-            return await Controller.Login(authRequest) as ObjectResult;
-        }
 
         [Fact]
         public async void LoginUserWithInvalidCredentials()
         {
+            //Arrange
+            var authRequest = new AuthRequest { username = "aUserNameThatDoesntExist", password = "lalal" };
             //Act
-            var result = await GetTestUserLoginData(new AuthRequest { username = "aUserNameThatDoesntExist", password = "lalal"});
+            var result = await Controller.Login(authRequest) as ObjectResult;
             // Assert
             Assert.Equal(400, result.StatusCode);
             Assert.Equal("Credentialele nu sunt invalide!", result.Value);
         }
 
-        [Fact]
-        public async void LoginUser()
+        [Theory]
+        [InlineData("username1", "password_1", 200)]
+        [InlineData("username3", "password_5", 400)]
+        [InlineData("username2", "password_2", 200)]
+        [InlineData("username2", "password_3", 400)]
+        [InlineData("username3", "password_3", 200)]
+        public async void LoginUser(string username, string password, int statusCode)
         {
+            //Arrange
+            var authRequest = new AuthRequest { username = username, password = password };
             //Act
-            var result = await GetTestUserLoginData();
+            var result = await Controller.Login(authRequest) as ObjectResult;
             // Assert
-            Assert.Equal(200, result.StatusCode);
-
-            var authResponse = result.Value as AuthResponse;
-
-            Assert.Equal(TestUser.UserName, authResponse.username);
-            Assert.Equal(TestUser.Email, authResponse.email);
-            Assert.NotNull(authResponse.jwt);
-
+            Assert.Equal(statusCode, result.StatusCode);
         }
 
         [Fact]
         public async void GetMeAsLoggedUser()
         {
-            var result = await GetTestUserLoginData();
-            Assert.Equal(200, result.StatusCode);
-            var authResponse = result.Value as AuthResponse;
-
-            var token = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.jwt);
-            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
-
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
-
+            //Arrange
+            var user = UserHelpers.GetUserObject();
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId(user);
             //Act
-            var meUser = (await Controller.GetMe() as OkObjectResult).Value as UserDTO;
+            var meUser = (await loggedInController.GetMe() as OkObjectResult).Value as UserDTO;
             // Assert
-            Assert.Equal(TestUser.Id, meUser.Id);
+            Assert.Equal(user.Id, meUser.Id);
         }
 
         [Fact]
         public async void LogoutUserThatIsSignedIn()
         {
+            //Arrange
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId();
             //Act
-            var result = await GetTestUserLoginData();
-            Assert.Equal(200, result.StatusCode);
-            var authResponse = result.Value as AuthResponse;
-
-            var token = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.jwt);
-            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
-
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
-            var logoutResult = await Controller.Logout() as ObjectResult;
+            var response = await loggedInController.Logout() as OkResult;
             // Assert
-            Assert.Equal(200, result.StatusCode);
+            Assert.NotNull(response);
         }
 
         [Fact]
         public async void EditUserInformation()
         {
-            var userToUpdate = new UserDTO
-            {
-                Email = "test_user3@gmail.com",
-                Password = "Password123",
-                UserName = "test_user3"
-            };
-            //Act
-            var result = (await Controller.Create(userToUpdate) as OkObjectResult).Value as AuthResponse;
-            var token = new JwtSecurityTokenHandler().ReadJwtToken(result.jwt);
-            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
-
+            //Arrange
+            var userToUpdate = UserHelpers.GetUserObject(3);
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId(userToUpdate);
             userToUpdate.Email = "test_userEmail@gmail.com";
             userToUpdate.UserName = "test_userEmail";
             //Act
-            var editResult = (await Controller.Edit(userToUpdate) as OkObjectResult).Value as AuthResponse;
+            var editResult = (await loggedInController.Edit(UserDTO.FromModel(userToUpdate)) as OkObjectResult).Value as AuthResponse;
             // Assert
             Assert.Equal(editResult.email, userToUpdate.Email);
             Assert.Equal(editResult.username, userToUpdate.UserName);
@@ -213,23 +122,13 @@ namespace MMSApi.Tests.Comments
         [Fact]
         public async void EditUserBadEmailInfo()
         {
-            var userToUpdate = new UserDTO
-            {
-                Email = "test_user6@gmail.com",
-                Password = "Password123",
-                UserName = "test_user6"
-            };
-            //Act
-            var result = (await Controller.Create(userToUpdate) as OkObjectResult).Value as AuthResponse;
-            var token = new JwtSecurityTokenHandler().ReadJwtToken(result.jwt);
-            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
-
+            //Arrange
+            var userToUpdate = UserHelpers.GetUserObject(3);
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId(userToUpdate);
             userToUpdate.Email = "";
             userToUpdate.UserName = "test_userEmail";
             //Act
-            var editResult = await Controller.Edit(userToUpdate) as BadRequestResult;
+            var editResult = await loggedInController.Edit(UserDTO.FromModel(userToUpdate)) as BadRequestResult;
             // Assert
             Assert.Equal(400, editResult.StatusCode);
         }
@@ -237,34 +136,20 @@ namespace MMSApi.Tests.Comments
         [Fact]
         public async void EditUserWithoutAuth()
         {
-            var userToUpdate = new UserDTO
-            {
-                Email = "test_user5@gmail.com",
-                Password = "Password123",
-                UserName = "test_user5"
-            };
+            //Arrange
+            var userToUpdate = UserHelpers.GetUserObject();
             //Act
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext();
-            var editResult = await Controller.Edit(userToUpdate) as UnauthorizedResult;
+            var editResult = await Controller.Edit(UserDTO.FromModel(userToUpdate)) as UnauthorizedResult;
             // Assert
             Assert.Equal(401, editResult.StatusCode);
         }
 
         [Fact]
-        public async void ChangePasswordWithInvalidCredentials()
+        public async void ChangePasswordWithoutBeingAuthenticated()
         {
+            //Arrange
+
             //Act
-            var result = await GetTestUserLoginData();
-            Assert.Equal(200, result.StatusCode);
-            var authResponse = result.Value as AuthResponse;
-
-            var token = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.jwt);
-            var identity = new ClaimsPrincipal(new ClaimsIdentity(token.Claims));
-
-            Controller.ControllerContext = new ControllerContext();
-            Controller.ControllerContext.HttpContext = new DefaultHttpContext { User = identity };
-
             var passResult = (await Controller.EditPassword(new UserController.PasswordRequest
             {
                 currentPassword = "somePassword",
@@ -272,6 +157,49 @@ namespace MMSApi.Tests.Comments
             })) as BadRequestResult;
             // Assert
             Assert.Equal(400, passResult.StatusCode);
+        }
+
+        [Fact]
+        public async void ChangePasswordWithInvalidCredentials()
+        {
+            //Arrange
+            var userToUpdate = UserHelpers.GetUserObject(2);
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId(userToUpdate);
+
+            //Act
+            var passResult = (await loggedInController.EditPassword(new UserController.PasswordRequest
+            {
+                currentPassword = "somePassword",
+                newPassword = "someNewPassword"
+            })) as BadRequestObjectResult;
+            // Assert
+            Assert.Equal("Credentialele sunt invalide!", passResult.Value);
+            Assert.Equal(400, passResult.StatusCode);
+        }
+
+        [Fact]
+        public async void ChangePassword()
+        {
+            //Arrange
+            var userToUpdate = UserHelpers.GetUserObject(6);
+            var loggedInController = await UserHelpers.GetControllerWithUserLoggedId(userToUpdate);
+
+            //Act
+            var passResult = (await loggedInController.EditPassword(new UserController.PasswordRequest
+            {
+                currentPassword = userToUpdate.PasswordHash,
+                newPassword = "someNewPassword"
+            })) as OkObjectResult;
+            // Assert
+            Assert.NotNull(passResult);
+
+            //Check if new passowrd works
+            //Arrange
+            var authRequest = new AuthRequest { username = userToUpdate.UserName, password = "someNewPassword" };
+            //Act
+            var result = await Controller.Login(authRequest) as ObjectResult;
+            // Assert
+            Assert.Equal(200, result.StatusCode);
         }
     }
 }

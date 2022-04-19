@@ -12,6 +12,5 @@ namespace MMSAPI.Repository
         T Add(T entity);
         T Edit(T entity);
         bool Delete(string id);
-        ICollection<T> Find(Expression<Func<T, bool>> expression);
     }
 }
